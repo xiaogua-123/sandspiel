@@ -1,6 +1,14 @@
+//! Extended gas simulation: steam, smoke, helium, chlorine, oxygen, hydrogen, plasma, methane.
+//! / 扩展气体模拟：蒸汽、烟雾、氦气、氯气、氧气、氢气、等离子体、甲烷。
+//!
+//! Gases rise, diffuse, and many are flammable or chemically reactive.
+//! / 气体上升、扩散，许多是可燃的或具有化学反应性。
+
 use crate::{Cell, SandApi, Wind, EMPTY_CELL};
 use super::Species;
 
+/// Helper: generic gas rising and diffusing physics.
+/// / 辅助函数：通用气体上升和扩散物理。
 fn gas_rise(cell: Cell, api: &mut SandApi, density: u8, flammable: bool) {
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
@@ -33,8 +41,9 @@ fn gas_rise(cell: Cell, api: &mut SandApi, density: u8, flammable: bool) {
     }
 }
 
+/// Steam: hot water vapor, condenses on cool surfaces (ice/snow), eventually condenses.
+/// / 蒸汽：热的水蒸气，在冷表面（冰/雪）上凝结，最终会自然凝结。
 pub fn update_steam(cell: Cell, mut api: SandApi) {
-    // Steam: condenses on cool surfaces
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if nbr.species == Species::Ice || nbr.species == Species::Snow {
@@ -50,8 +59,9 @@ pub fn update_steam(cell: Cell, mut api: SandApi) {
     gas_rise(cell, &mut api, 40, false);
 }
 
+/// Smoke: rises, dissipates over time (rb = age counter).
+/// / 烟雾：上升，随时间消散（rb = 年龄计数器）。
 pub fn update_smoke(cell: Cell, mut api: SandApi) {
-    // Smoke: rises, dissipates over time
     let rb = cell.rb.saturating_add(1);
     if rb > 120 {
         api.set(0, 0, EMPTY_CELL);
@@ -68,8 +78,9 @@ pub fn update_smoke(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Helium: very light inert gas, rises rapidly through other elements.
+/// / 氦气：极轻的惰性气体，快速上升穿过其他元素。
 pub fn update_helium(cell: Cell, mut api: SandApi) {
-    // Helium: very light, rises fast, inert
     let (dx, dy) = api.rand_vec();
     if dy == -1 {
         let nbr = api.get(dx, -1);
@@ -82,8 +93,9 @@ pub fn update_helium(cell: Cell, mut api: SandApi) {
     gas_rise(cell, &mut api, 10, false);
 }
 
+/// Chlorine: toxic heavy gas, kills organic life, tends to sink rather than rise.
+/// / 氯气：有毒重气体，杀死有机生命，倾向于下沉而非上升。
 pub fn update_chlorine(cell: Cell, mut api: SandApi) {
-    // Chlorine: toxic gas, kills organics, heavier than air
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if matches!(nbr.species,
@@ -104,8 +116,9 @@ pub fn update_chlorine(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Oxygen: feeds fire, making it burn hotter and spread faster.
+/// / 氧气：助燃火焰，使其燃烧更旺、扩散更快。
 pub fn update_oxygen(cell: Cell, mut api: SandApi) {
-    // Oxygen: feeds fire
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if nbr.species == Species::Fire {
@@ -119,8 +132,9 @@ pub fn update_oxygen(cell: Cell, mut api: SandApi) {
     gas_rise(cell, &mut api, 30, false);
 }
 
+/// Hydrogen: very light and extremely flammable, produces powerful explosions.
+/// / 氢气：极轻且极度易燃，产生强力爆炸。
 pub fn update_hydrogen(cell: Cell, mut api: SandApi) {
-    // Hydrogen: very light, extremely flammable
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if nbr.species == Species::Fire || nbr.species == Species::Lava || nbr.species == Species::Lightning {
@@ -137,8 +151,9 @@ pub fn update_hydrogen(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Plasma: super-hot ionized gas, destroys nearly everything, short-lived.
+/// / 等离子体：超高温电离气体，几乎摧毁一切，寿命短暂。
 pub fn update_plasma(cell: Cell, mut api: SandApi) {
-    // Plasma: super-hot ionized gas, destroys nearly everything
     api.set_fluid(Wind { dx: 0, dy: 100, pressure: 50, density: 200 });
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
@@ -160,8 +175,9 @@ pub fn update_plasma(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Methane: flammable greenhouse gas, burns intensely with fire/lava.
+/// / 甲烷：可燃温室气体，遇火焰/岩浆剧烈燃烧。
 pub fn update_methane(cell: Cell, mut api: SandApi) {
-    // Methane: flammable, greenhouse gas
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if nbr.species == Species::Fire || nbr.species == Species::Lava {

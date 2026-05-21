@@ -1,8 +1,15 @@
+//! Technology element simulation: wire, circuit, battery, solar cell, laser, LED.
+//! / 科技元素模拟：电线、电路、电池、太阳能电池、激光、LED。
+//!
+//! Tech elements form an energy-based subsystem with power generation, conduction, and emission.
+//! / 科技元素形成了一个基于能量的子系统，包含发电、传导和发射功能。
+
 use crate::{Cell, SandApi, Wind, EMPTY_CELL};
 use super::Species;
 
+/// Wire: conducts energy through itself, transmitting to opposite side.
+/// / 电线：通过自身传导能量，传输到对侧。
 pub fn update_wire(cell: Cell, mut api: SandApi) {
-    // Wire: conducts energy, stationary
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if nbr.species == Species::Energy || nbr.species == Species::Lightning {
@@ -15,8 +22,9 @@ pub fn update_wire(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Circuit: processes energy input and outputs amplified signal, shorts out in water/acid.
+/// / 电路：处理能量输入并输出放大信号，遇水/酸短路。
 pub fn update_circuit(cell: Cell, mut api: SandApi) {
-    // Circuit: processes energy input
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if nbr.species == Species::Energy {
@@ -33,8 +41,9 @@ pub fn update_circuit(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Battery: stores energy from nearby energy particles, releases to empty spaces, slowly self-discharges.
+/// / 电池：从附近能量粒子中储存能量，向空白处释放，缓慢自放电。
 pub fn update_battery(cell: Cell, mut api: SandApi) {
-    // Battery: stores and releases energy
     let ra = cell.ra; // charge level
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
@@ -57,8 +66,9 @@ pub fn update_battery(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Solar cell: generates energy from light (higher on screen = more sun exposure).
+/// / 太阳能电池：从光中产生能量（屏幕越靠上 = 越多的阳光照射）。
 pub fn update_solar_cell(cell: Cell, mut api: SandApi) {
-    // Solar cell: generates energy from light (top of screen = sun)
     let ra = cell.ra;
     // Higher y position = more sun
     let sun_exposure = 255 - (api.y as i32 * 255 / api.universe.height) as u8;
@@ -72,8 +82,9 @@ pub fn update_solar_cell(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Laser: shoots a beam in encoded direction, burns through materials, reflected by mirrors.
+/// / 激光：按编码方向发射光束，烧穿材料，被镜子反射。
 pub fn update_laser(cell: Cell, mut api: SandApi) {
-    // Laser: shoots beam in one direction
     let rb = cell.rb; // direction stored in rb
     let dir = if rb < 4 { 0 } else { ((rb - 4) % 8) as i32 };
     let (dx, dy) = match dir {
@@ -96,8 +107,9 @@ pub fn update_laser(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// LED: lights up (emits density 200 via fluid) when powered by energy or battery.
+/// / LED：当由能量或电池供电时亮起（通过流体发射密度 200）。
 pub fn update_led(cell: Cell, mut api: SandApi) {
-    // LED: lights up when powered
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if nbr.species == Species::Energy || nbr.species == Species::Battery {

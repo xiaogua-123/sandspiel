@@ -1,6 +1,14 @@
+//! Natural material simulation: clay, soil, peat, limestone, chalk, shale, slate, sandstone.
+//! / 自然材料模拟：粘土、土壤、泥炭、石灰岩、白垩、页岩、板岩、砂岩。
+//!
+//! These represent earth materials with erosion, absorption, plant support, and geological behaviors.
+//! / 这些代表具有侵蚀、吸收、植物支持和地质行为的土质材料。
+
 use crate::{Cell, SandApi, Wind, EMPTY_CELL};
 use super::Species;
 
+/// Helper: natural material falling physics with optional crumbling under pressure.
+/// / 辅助函数：自然材料下落物理，压力下可选碎裂。
 fn nature_fall(cell: Cell, api: &mut SandApi, crumbles: bool, crush_resist: i32) {
     let fluid = api.get_fluid();
     if crumbles && fluid.pressure > 130 && api.once_in(crush_resist) {
@@ -19,8 +27,9 @@ fn nature_fall(cell: Cell, api: &mut SandApi, crumbles: bool, crush_resist: i32)
     }
 }
 
+/// Clay: moldable, hardens into brick near fire/lava, absorbs water.
+/// / 粘土：可塑，在火焰/岩浆附近硬化成砖，吸收水分。
 pub fn update_clay(cell: Cell, mut api: SandApi) {
-    // Clay: moldable, hardens near heat
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if (nbr.species == Species::Fire || nbr.species == Species::Lava) && api.once_in(30) {
@@ -35,8 +44,9 @@ pub fn update_clay(cell: Cell, mut api: SandApi) {
     nature_fall(cell, &mut api, false, 0);
 }
 
+/// Soil: base medium for plant growth, holds water, supports seeds taking root.
+/// / 土壤：植物生长的基础介质，保水，支持种子生根。
 pub fn update_soil(cell: Cell, mut api: SandApi) {
-    // Soil: base for plants, holds water
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if nbr.species == Species::Seed && api.once_in(30) {
@@ -50,8 +60,9 @@ pub fn update_soil(cell: Cell, mut api: SandApi) {
     nature_fall(cell, &mut api, false, 0);
 }
 
+/// Peat: organic soil, highly flammable, great for accelerating seed growth.
+/// / 泥炭：有机土壤，高度可燃，极利于加速种子生长。
 pub fn update_peat(cell: Cell, mut api: SandApi) {
-    // Peat: organic soil, flammable
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if nbr.species == Species::Fire || nbr.species == Species::Lava {
@@ -66,8 +77,9 @@ pub fn update_peat(cell: Cell, mut api: SandApi) {
     nature_fall(cell, &mut api, false, 0);
 }
 
+/// Limestone: sedimentary rock, dissolves in acid, slowly eroded by water.
+/// / 石灰岩：沉积岩，溶于酸，被水缓慢侵蚀。
 pub fn update_limestone(cell: Cell, mut api: SandApi) {
-    // Limestone: sedimentary, dissolves in acid
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if nbr.species == Species::Acid && api.once_in(15) {
@@ -80,8 +92,9 @@ pub fn update_limestone(cell: Cell, mut api: SandApi) {
     nature_fall(cell, &mut api, true, 10);
 }
 
+/// Chalk: soft sedimentary material, dissolves quickly in acid, crumbles easily.
+/// / 白垩：柔软的沉积材料，在酸中迅速溶解，容易碎裂。
 pub fn update_chalk(cell: Cell, mut api: SandApi) {
-    // Chalk: soft, marks surfaces
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if nbr.species == Species::Acid && api.once_in(5) {
@@ -97,8 +110,9 @@ pub fn update_chalk(cell: Cell, mut api: SandApi) {
     nature_fall(cell, &mut api, true, 3);
 }
 
+/// Shale: layered sedimentary rock, splits into sand under pressure.
+/// / 页岩：层状沉积岩，在压力下碎裂成沙子。
 pub fn update_shale(cell: Cell, mut api: SandApi) {
-    // Shale: layered rock, splits easily
     let fluid = api.get_fluid();
     if fluid.pressure > 100 && api.once_in(8) {
         api.set(0, 0, Cell { species: Species::Sand, ra: cell.ra, rb: 0, clock: 0 });
@@ -107,13 +121,15 @@ pub fn update_shale(cell: Cell, mut api: SandApi) {
     nature_fall(cell, &mut api, true, 8);
 }
 
+/// Slate: metamorphic rock with flat layers, good crush resistance.
+/// / 板岩：变质岩，平整层状，良好的抗压性。
 pub fn update_slate(cell: Cell, mut api: SandApi) {
-    // Slate: metamorphic, flat layers
     nature_fall(cell, &mut api, true, 12);
 }
 
+/// Sandstone: cemented sand grains, porous (eroded by water), crumbles under pressure.
+/// / 砂岩：胶结的沙粒，多孔（被水侵蚀），压力下碎裂。
 pub fn update_sandstone(cell: Cell, mut api: SandApi) {
-    // Sandstone: cemented sand, porous
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if nbr.species == Species::Water && api.once_in(30) {

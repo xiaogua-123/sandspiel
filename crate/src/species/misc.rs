@@ -1,8 +1,15 @@
+//! Miscellaneous and toy element simulation: bubble, balloon, confetti, glitter, spring, domino.
+//! / 杂项和玩具元素模拟：气泡、气球、彩纸屑、闪光粉、弹簧、多米诺骨牌。
+//!
+//! These are fun elements with purely aesthetic or toy physics behaviors.
+//! / 这些是有趣的元素，具有纯美学或玩具物理行为。
+
 use crate::{Cell, SandApi, Wind, EMPTY_CELL};
 use super::Species;
 
+/// Bubble: floats upward with drift, pops on contact with anything, eventually pops on its own.
+/// / 气泡：向上浮动并飘移，接触任何东西时破裂，最终自行破裂。
 pub fn update_bubble(cell: Cell, mut api: SandApi) {
-    // Bubble: floats upward, pops on contact
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if nbr.species != Species::Empty {
@@ -26,8 +33,9 @@ pub fn update_bubble(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Balloon: inflated balloon floats up (ra > 20), deflates and falls, bounces off surfaces, pops near fire.
+/// / 气球：充气的气球向上浮（ra > 20），放气后下落，在表面上弹跳，靠近火焰时爆裂。
 pub fn update_balloon(cell: Cell, mut api: SandApi) {
-    // Balloon: floats up, bounces off surfaces
     let ra = cell.ra; // air inside
     if ra < 20 {
         // Deflated
@@ -71,8 +79,9 @@ pub fn update_balloon(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Confetti: colorful paper, floats around randomly, falls slowly, flammable.
+/// / 彩纸屑：彩色纸片，随机漂浮，缓慢下落，可燃。
 pub fn update_confetti(cell: Cell, mut api: SandApi) {
-    // Confetti: colorful, floats around randomly
     let (dx, dy) = api.rand_vec();
     if api.get(dx, dy).species == Species::Empty && api.once_in(2) {
         api.set(0, 0, EMPTY_CELL);
@@ -94,8 +103,9 @@ pub fn update_confetti(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Glitter: sparkly particles, falls very slowly, drifts sideways easily.
+/// / 闪光粉：闪亮颗粒，极慢下落，容易侧向飘移。
 pub fn update_glitter(cell: Cell, mut api: SandApi) {
-    // Glitter: sparkly, falls very slowly, twinkles
     let dx = api.rand_dir();
     // Very light, drifts
     let below = api.get(0, 1);
@@ -113,8 +123,9 @@ pub fn update_glitter(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Spring: bouncy element, launches things on top upward, compresses when stepped on.
+/// / 弹簧：有弹性的元素，将上面的物体向上弹射，被踩压时压缩。
 pub fn update_spring(cell: Cell, mut api: SandApi) {
-    // Spring: bouncy, launches things upward
     let above = api.get(0, -1);
     if above.species != Species::Empty && above.species != Species::Wall
         && above.species != Species::Spring {
@@ -135,8 +146,9 @@ pub fn update_spring(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Domino: stands upright, falls when knocked (rb > 0), triggers chain reaction with neighbors.
+/// / 多米诺骨牌：竖直站立，被推倒时（rb > 0）倒下，触发相邻骨牌的连锁反应。
 pub fn update_domino(cell: Cell, mut api: SandApi) {
-    // Domino: falls over and knocks down neighbors
     let rb = cell.rb;
     let (dx, dy) = api.rand_vec_8();
     let nbr = api.get(dx, dy);

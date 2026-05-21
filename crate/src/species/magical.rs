@@ -1,8 +1,15 @@
+//! Magical and special element simulation: portal, teleporter, antigravity, magnet, lightning, void, chaos, energy, shield, mirror.
+//! / 魔法和特殊元素模拟：传送门、传送器、反重力、磁铁、闪电、虚空、混沌、能量、护盾、镜子。
+//!
+//! These elements introduce physics-bending mechanics that create emergent gameplay.
+//! / 这些元素引入了打破物理定律的机制，创造出涌现式玩法。
+
 use crate::{Cell, SandApi, Wind, EMPTY_CELL};
 use super::Species;
 
+/// Portal: teleports nearby particles to a random location within range.
+/// / 传送门：将附近的粒子传送到范围内的随机位置。
 pub fn update_portal(cell: Cell, mut api: SandApi) {
-    // Portal: teleports nearby particles to another random location
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if nbr.species != Species::Empty && nbr.species != Species::Wall
@@ -19,8 +26,9 @@ pub fn update_portal(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Teleporter: when touched by anything, instantly swaps positions to a random nearby empty cell.
+/// / 传送器：接触到任何东西时，立即与随机附近的空白单元格交换位置。
 pub fn update_teleporter(cell: Cell, mut api: SandApi) {
-    // Teleporter: when touched by anything, swaps positions
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if nbr.species != Species::Empty && nbr.species != Species::Wall
@@ -33,8 +41,9 @@ pub fn update_teleporter(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Antigravity: creates strong upward wind force, making nearby things float upward.
+/// / 反重力：产生强烈的向上风力，使附近的东西向上漂浮。
 pub fn update_antigravity(cell: Cell, mut api: SandApi) {
-    // Antigravity: makes nearby things float upward
     api.set_fluid(Wind { dx: 0, dy: 200, pressure: 0, density: 0 });
     // Push nearby cells upward
     let adx = api.rand_dir();
@@ -47,8 +56,9 @@ pub fn update_antigravity(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Magnet: attracts ferromagnetic metal elements (iron, copper, steel, zinc, tin, wire) toward itself.
+/// / 磁铁：将铁磁金属元素（铁、铜、钢、锌、锡、电线）吸引到自己身边。
 pub fn update_magnet(cell: Cell, mut api: SandApi) {
-    // Magnet: attracts metal elements
     for dx in -2..=2 {
         for dy in -2..=2 {
             if dx == 0 && dy == 0 { continue; }
@@ -68,8 +78,9 @@ pub fn update_magnet(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Lightning: strikes downward, powerful electric discharge that creates plasma on impact.
+/// / 闪电：向下击中，强力放电，撞击时产生等离子体。
 pub fn update_lightning(cell: Cell, mut api: SandApi) {
-    // Lightning: strikes downward, powerful electric discharge
     api.set_fluid(Wind { dx: 0, dy: 100, pressure: 200, density: 200 });
     let below = api.get(0, 1);
     if below.species != Species::Empty && below.species != Species::Wall
@@ -88,8 +99,9 @@ pub fn update_lightning(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Void: destroys everything it touches, slowly dissipates over time.
+/// / 虚空：摧毁接触到的一切，随时间缓慢消散。
 pub fn update_void(cell: Cell, mut api: SandApi) {
-    // Void: destroys everything it touches
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if nbr.species != Species::Wall && nbr.species != Species::Void
@@ -102,8 +114,9 @@ pub fn update_void(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Chaos: randomly transforms nearby elements into other species, slowly dissipates.
+/// / 混沌：随机将附近元素转化为其他物种，缓慢消散。
 pub fn update_chaos(cell: Cell, mut api: SandApi) {
-    // Chaos: randomly transforms nearby elements
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if nbr.species != Species::Empty && nbr.species != Species::Wall
@@ -131,8 +144,9 @@ pub fn update_chaos(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Energy: pure energy that spreads to empty spaces, powers batteries/solar cells, dissipates.
+/// / 能量：纯能量，扩散到空白处，为电池/太阳能电池供电，逐渐消散。
 pub fn update_energy(cell: Cell, mut api: SandApi) {
-    // Energy: pure energy, spreads and powers things
     api.set_fluid(Wind { dx: 0, dy: 0, pressure: 10, density: 200 });
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
@@ -151,8 +165,9 @@ pub fn update_energy(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Shield: impenetrable barrier that blocks void/fire/lava/acid/plasma/lightning/chaos, weakens on each hit.
+/// / 护盾：不可穿透的屏障，阻挡虚空/火焰/岩浆/酸/等离子体/闪电/混沌，每次受击都会减弱。
 pub fn update_shield(cell: Cell, mut api: SandApi) {
-    // Shield: impenetrable barrier that weakens over time
     let rb = cell.rb.saturating_add(1);
     if rb > 100 {
         api.set(0, 0, EMPTY_CELL);
@@ -171,8 +186,9 @@ pub fn update_shield(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Mirror: reflects lasers in the opposite direction, stationary.
+/// / 镜子：将激光反射到相反方向，静止不动。
 pub fn update_mirror(cell: Cell, mut api: SandApi) {
-    // Mirror: reflects lasers, stationary
     let (dx, dy) = api.rand_vec();
     let nbr = api.get(dx, dy);
     if nbr.species == Species::Laser {

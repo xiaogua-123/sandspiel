@@ -1,7 +1,20 @@
+//! Metal element simulation: iron, copper, gold, silver, aluminum, lead, zinc, tin, bronze, steel.
+//! / 金属元素模拟：铁、铜、金、银、铝、铅、锌、锡、青铜、钢。
+//!
+//! Metals are heavy solids that sink through most liquids, conduct heat,
+//! and many have unique reactions (rusting, tarnishing, amalgamation, etc.).
+//! / 金属是重型固体，会沉入大多数液体中，导热，
+//! / 许多金属有独特的反应（生锈、失去光泽、汞齐化等）。
+
 use crate::{Cell, SandApi, EMPTY_CELL};
 use super::Species;
 
-/// Helper: heavy falling solid that sinks through most liquids
+/// Helper: heavy falling solid that sinks through most liquids.
+/// / 辅助函数：会沉入大多数液体中的重型下落固体。
+/// melt_temp: how resistant to melting (0 = doesn't melt).
+/// / melt_temp: 抗熔化程度（0 = 不熔化）。
+/// melt_into: what species to become when melted.
+/// / melt_into: 熔化后变成什么物种。
 fn heavy_fall(cell: Cell, api: &mut SandApi, melt_temp: u8, melt_into: Species) {
     // Check if near fire/lava for melting
     let (dx, dy) = api.rand_vec();
@@ -12,7 +25,7 @@ fn heavy_fall(cell: Cell, api: &mut SandApi, melt_temp: u8, melt_into: Species) 
             return;
         }
     }
-    // Heavy: sinks through lighter liquids
+    // Heavy: sinks through lighter liquids / 重：沉入较轻的液体中
     let below = api.get(0, 1);
     if below.species == Species::Empty {
         api.set(0, 0, EMPTY_CELL);
@@ -32,23 +45,25 @@ fn heavy_fall(cell: Cell, api: &mut SandApi, melt_temp: u8, melt_into: Species) 
     }
 }
 
+/// Iron: heavy ferromagnetic metal, rusts in water, melts in extreme heat.
+/// / 铁：重型铁磁金属，在水中生锈，极端高温下熔化。
 pub fn update_iron(cell: Cell, mut api: SandApi) {
-    // Iron: heavy, rusts in water, melts in extreme heat
     let (dx, dy) = api.rand_vec_8();
     let nbr = api.get(dx, dy);
     if (nbr.species == Species::Lava) && api.once_in(20) {
         api.set(0, 0, Cell { species: Species::Lava, ra: 100, rb: 0, clock: 0 });
         return;
     }
-    // Rust in water
+    // Iron rusts in water, gradually degrading / 铁在水中生锈，逐渐降解
     if nbr.species == Species::Water && api.once_in(50) {
         api.set(0, 0, Cell { ra: cell.ra.saturating_sub(2), ..cell });
     }
     heavy_fall(cell, &mut api, 0, Species::Empty);
 }
 
+/// Copper: conducts heat, turns green (patina) near acid.
+/// / 铜：导热，在酸附近变绿（铜绿）。
 pub fn update_copper(cell: Cell, mut api: SandApi) {
-    // Copper: conducts heat, turns green near acid
     let (dx, dy) = api.rand_vec_8();
     let nbr = api.get(dx, dy);
     if (nbr.species == Species::Lava) && api.once_in(25) {
@@ -61,8 +76,9 @@ pub fn update_copper(cell: Cell, mut api: SandApi) {
     heavy_fall(cell, &mut api, 0, Species::Empty);
 }
 
+/// Gold: very dense, inert noble metal, sinks through many liquids.
+/// / 金：密度极高的惰性贵金属，可沉入多种液体中。
 pub fn update_gold(cell: Cell, mut api: SandApi) {
-    // Gold: very dense, inert, doesn't react much
     let below = api.get(0, 1);
     if below.species == Species::Empty {
         api.set(0, 0, EMPTY_CELL);
@@ -77,8 +93,9 @@ pub fn update_gold(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Silver: tarnishes near acid, conductive, melts at moderate heat.
+/// / 银：在酸附近失去光泽，导电，中等温度下熔化。
 pub fn update_silver(cell: Cell, mut api: SandApi) {
-    // Silver: tarnishes near acid, conductive
     let (dx, dy) = api.rand_vec_8();
     let nbr = api.get(dx, dy);
     if nbr.species == Species::Acid && api.once_in(20) {
@@ -87,8 +104,9 @@ pub fn update_silver(cell: Cell, mut api: SandApi) {
     heavy_fall(cell, &mut api, 30, Species::Lava);
 }
 
+/// Aluminum: lightweight metal, melts at moderate heat, doesn't sink through all liquids.
+/// / 铝：轻质金属，中等温度下熔化，不会沉入所有液体中。
 pub fn update_aluminum(cell: Cell, mut api: SandApi) {
-    // Aluminum: lightweight, melts at moderate heat
     let (dx, dy) = api.rand_vec_8();
     let nbr = api.get(dx, dy);
     if (nbr.species == Species::Fire || nbr.species == Species::Lava) && api.once_in(12) {
@@ -111,8 +129,9 @@ pub fn update_aluminum(cell: Cell, mut api: SandApi) {
     }
 }
 
+/// Lead: very dense, toxic (poisons nearby water), low melting point.
+/// / 铅：密度极大，有毒（污染附近的水），低熔点。
 pub fn update_lead(cell: Cell, mut api: SandApi) {
-    // Lead: very dense, toxic, melts
     let (dx, dy) = api.rand_vec_8();
     let nbr = api.get(dx, dy);
     if (nbr.species == Species::Fire || nbr.species == Species::Lava) && api.once_in(15) {
@@ -126,8 +145,9 @@ pub fn update_lead(cell: Cell, mut api: SandApi) {
     heavy_fall(cell, &mut api, 0, Species::Empty);
 }
 
+/// Zinc: brittle metal, reacts vigorously with acid releasing gas.
+/// / 锌：脆性金属，与酸剧烈反应释放气体。
 pub fn update_zinc(cell: Cell, mut api: SandApi) {
-    // Zinc: brittle, reacts with acid
     let (dx, dy) = api.rand_vec_8();
     let nbr = api.get(dx, dy);
     if nbr.species == Species::Acid && api.once_in(10) {
@@ -142,8 +162,9 @@ pub fn update_zinc(cell: Cell, mut api: SandApi) {
     heavy_fall(cell, &mut api, 0, Species::Empty);
 }
 
+/// Tin: soft metal with very low melting point.
+/// / 锡：软金属，熔点极低。
 pub fn update_tin(cell: Cell, mut api: SandApi) {
-    // Tin: soft, low melting point
     let (dx, dy) = api.rand_vec_8();
     let nbr = api.get(dx, dy);
     if (nbr.species == Species::Fire || nbr.species == Species::Lava) && api.once_in(10) {
@@ -153,13 +174,15 @@ pub fn update_tin(cell: Cell, mut api: SandApi) {
     heavy_fall(cell, &mut api, 0, Species::Empty);
 }
 
+/// Bronze: strong copper-tin alloy, resistant to melting.
+/// / 青铜：坚固的铜锡合金，抗熔化。
 pub fn update_bronze(cell: Cell, mut api: SandApi) {
-    // Bronze: strong alloy, resistant
     heavy_fall(cell, &mut api, 35, Species::Lava);
 }
 
+/// Steel: strongest metal, very resistant to heat and melting.
+/// / 钢：最强金属，极耐热和熔化。
 pub fn update_steel(cell: Cell, mut api: SandApi) {
-    // Steel: strongest, very resistant to heat
     let (dx, dy) = api.rand_vec_8();
     let nbr = api.get(dx, dy);
     if (nbr.species == Species::Lava) && api.once_in(40) {

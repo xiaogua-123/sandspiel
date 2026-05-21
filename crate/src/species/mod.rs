@@ -1,7 +1,14 @@
+//! Species enum and dispatch module for the falling-sand simulation.
+//! / 沙盘模拟的物种枚举和分派模块。
+//!
+//! Defines all 136 element types and maps each to its update function.
+//! / 定义了全部 136 种元素类型，并将每种类型映射到其更新函数。
+
 use wasm_bindgen::prelude::*;
 
 use crate::{Cell, SandApi};
 
+// Original simulation elements / 原始模拟元素
 mod falling;
 mod gas;
 mod liquid;
@@ -9,6 +16,7 @@ mod new;
 mod organic;
 mod special;
 
+// Extended element categories / 扩展元素类别
 mod metals;
 mod crystals;
 mod powders;
@@ -24,35 +32,38 @@ mod nature;
 mod tech;
 mod misc;
 
+/// All possible element types in the simulation (136 total).
+/// / 模拟中所有可能的元素类型（总计 136 种）。
 #[wasm_bindgen]
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Species {
-    Empty = 0,
-    Wall = 1,
-    Sand = 2,
-    Water = 3,
-    Gas = 4,
-    Cloner = 5,
-    Fire = 6,
-    Wood = 7,
-    Lava = 8,
-    Ice = 9,
-    Snow = 10,
-    Plant = 11,
-    Acid = 12,
-    Stone = 13,
-    Dust = 14,
-    Mite = 15,
-    Oil = 16,
-    Rocket = 17,
-    Fungus = 18,
-    Seed = 19,
-    Sponge = 20,
-    Slime = 21,
-    Glass = 22,
-    Coral = 23,
-    // Metals (24-33)
+    // --- Base Elements / 基础元素 (0-23) ---
+    Empty = 0,   // void / 空
+    Wall = 1,    // indestructible barrier / 不可破坏的屏障
+    Sand = 2,    // granular falling solid / 粒状下落固体
+    Water = 3,   // flowing liquid / 流动液体
+    Gas = 4,     // generic rising gas / 通用上升气体
+    Cloner = 5,  // copies nearby elements / 复制附近的元素
+    Fire = 6,    // spreading flame / 扩散火焰
+    Wood = 7,    // flammable solid / 可燃固体
+    Lava = 8,    // hot liquid rock / 炽热液态岩石
+    Ice = 9,     // frozen water / 冰冻的水
+    Snow = 10,   // light powder, melts / 轻粉末，会融化
+    Plant = 11,  // growing organic / 生长的有机物
+    Acid = 12,   // corrosive liquid / 腐蚀性液体
+    Stone = 13,  // heavy inert solid / 重型惰性固体
+    Dust = 14,   // fine explosive powder / 细小爆炸性粉末
+    Mite = 15,   // tiny creature / 微小生物
+    Oil = 16,    // flammable liquid / 可燃液体
+    Rocket = 17, // directed projectile / 定向发射物
+    Fungus = 18, // spreading organic / 扩散真菌
+    Seed = 19,   // grows into plants / 长成植物
+    Sponge = 20, // absorbs liquids / 吸收液体
+    Slime = 21,  // bouncy sticky goo / 弹性粘稠物
+    Glass = 22,  // transparent solid / 透明固体
+    Coral = 23,  // underwater growth / 水下生长物
+    // --- Metals / 金属 (24-33) ---
     Iron = 24,
     Copper = 25,
     Gold = 26,
@@ -63,7 +74,7 @@ pub enum Species {
     Tin = 31,
     Bronze = 32,
     Steel = 33,
-    // Crystals/Gems (34-41)
+    // --- Crystals & Gems / 晶体和宝石 (34-41) ---
     Diamond = 34,
     Ruby = 35,
     Sapphire = 36,
@@ -72,7 +83,7 @@ pub enum Species {
     Quartz = 39,
     Crystal = 40,
     Obsidian = 41,
-    // Powders (42-49)
+    // --- Powders / 粉末 (42-49) ---
     Gunpowder = 42,
     Flour = 43,
     Sugar = 44,
@@ -81,7 +92,7 @@ pub enum Species {
     Ash = 47,
     Soot = 48,
     Charcoal = 49,
-    // More Liquids (50-57)
+    // --- More Liquids / 更多液体 (50-57) ---
     Mud = 50,
     Blood = 51,
     Honey = 52,
@@ -90,7 +101,7 @@ pub enum Species {
     Mercury = 55,
     Alcohol = 56,
     Syrup = 57,
-    // More Gases (58-65)
+    // --- More Gases / 更多气体 (58-65) ---
     Steam = 58,
     Smoke = 59,
     Helium = 60,
@@ -99,7 +110,7 @@ pub enum Species {
     Hydrogen = 63,
     PlasmaGas = 64,
     Methane = 65,
-    // More Organics (66-75)
+    // --- More Organics / 更多有机物 (66-75) ---
     Leaf = 66,
     Flower = 67,
     Grass = 68,
@@ -110,7 +121,7 @@ pub enum Species {
     Root = 73,
     Fruit = 74,
     Thorn = 75,
-    // Small Creatures (76-83)
+    // --- Small Creatures / 小型生物 (76-83) ---
     Ant = 76,
     Spider = 77,
     Bee = 78,
@@ -119,7 +130,7 @@ pub enum Species {
     Bird = 81,
     Snake = 82,
     Worm = 83,
-    // Explosives/Hazards (84-91)
+    // --- Explosives & Hazards / 爆炸物和危险品 (84-91) ---
     TNT = 84,
     Bomb = 85,
     Nitro = 86,
@@ -128,7 +139,7 @@ pub enum Species {
     C4 = 89,
     Thermite = 90,
     Napalm = 91,
-    // Construction (92-99)
+    // --- Construction Materials / 建筑材料 (92-99) ---
     Brick = 92,
     Concrete = 93,
     Cement = 94,
@@ -137,7 +148,7 @@ pub enum Species {
     Marble = 97,
     Granite = 98,
     Basalt = 99,
-    // Magical/Special (100-109)
+    // --- Magical & Special / 魔法和特殊物品 (100-109) ---
     Portal = 100,
     Teleporter = 101,
     Antigravity = 102,
@@ -148,14 +159,14 @@ pub enum Species {
     Energy = 107,
     Shield = 108,
     Mirror = 109,
-    // Food (110-115)
+    // --- Food / 食物 (110-115) ---
     Bread = 110,
     Cheese = 111,
     Meat = 112,
     Egg = 113,
     Rice = 114,
     Wheat = 115,
-    // Nature (116-123)
+    // --- Nature / 自然物质 (116-123) ---
     Clay = 116,
     Soil = 117,
     Peat = 118,
@@ -164,14 +175,14 @@ pub enum Species {
     Shale = 121,
     Slate = 122,
     Sandstone = 123,
-    // Tech (124-129)
+    // --- Tech / 科技 (124-129) ---
     Wire = 124,
     Circuit = 125,
     Battery = 126,
     SolarCell = 127,
     Laser = 128,
     LED = 129,
-    // Misc/Toys (130-135)
+    // --- Misc & Toys / 杂项和玩具 (130-135) ---
     Bubble = 130,
     Balloon = 131,
     Confetti = 132,
@@ -181,6 +192,8 @@ pub enum Species {
 }
 
 impl Species {
+    /// Dispatch the species-specific update function based on the enum variant.
+    /// / 根据枚举变体分派物种特定的更新函数。
     pub fn update(&self, cell: Cell, api: SandApi) {
         match self {
             Species::Empty => {}
