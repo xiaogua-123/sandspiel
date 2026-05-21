@@ -12,11 +12,67 @@ import { functions, storage } from "../api.js";
 import SignInButton from "./signinButton.js";
 import Promotab from "./promotab";
 import { svgToImageData, rgbaToSpecies } from "../convertSVG";
+import levels from "../game/levels";
 
 import Menu from "./menu";
 
 window.species = Species;
 let pallette_data = pallette();
+
+const cnName = {
+  Empty: "空", Wall: "墙", Sand: "沙", Water: "水",
+  Stone: "石", Ice: "冰", Gas: "气", Cloner: "复制",
+  Mite: "虫", Wood: "木", Plant: "植物", Fungus: "菌",
+  Seed: "种子", Fire: "火", Lava: "岩浆", Acid: "酸",
+  Dust: "尘", Oil: "油", Rocket: "火箭",
+  Snow: "雪", Sponge: "海绵", Slime: "史莱姆", Glass: "玻璃",
+  Coral: "珊瑚",
+  // Metals
+  Iron: "铁", Copper: "铜", Gold: "金", Silver: "银",
+  Aluminum: "铝", Lead: "铅", Zinc: "锌", Tin: "锡",
+  Bronze: "青铜", Steel: "钢",
+  // Crystals
+  Diamond: "钻石", Ruby: "红宝石", Sapphire: "蓝宝石", Emerald: "绿宝石",
+  Amethyst: "紫水晶", Quartz: "石英", Crystal: "水晶", Obsidian: "黑曜石",
+  // Powders
+  Gunpowder: "火药", Flour: "面粉", Sugar: "糖", Salt: "盐",
+  Pepper: "胡椒", Ash: "灰烬", Soot: "烟灰", Charcoal: "木炭",
+  // Liquids
+  Mud: "泥浆", Blood: "血液", Honey: "蜂蜜", Milk: "牛奶",
+  Poison: "毒药", Mercury: "水银", Alcohol: "酒精", Syrup: "糖浆",
+  // Gases
+  Steam: "蒸汽", Smoke: "烟雾", Helium: "氦气", Chlorine: "氯气",
+  Oxygen: "氧气", Hydrogen: "氢气", PlasmaGas: "等离子", Methane: "甲烷",
+  // Organics
+  Leaf: "树叶", Flower: "花朵", Grass: "草", Vine: "藤蔓",
+  Moss: "苔藓", Mushroom: "蘑菇", Bark: "树皮", Root: "根",
+  Fruit: "果实", Thorn: "荆棘",
+  // Creatures
+  Ant: "蚂蚁", Spider: "蜘蛛", Bee: "蜜蜂", Butterfly: "蝴蝶",
+  Fish: "鱼", Bird: "鸟", Snake: "蛇", Worm: "蠕虫",
+  // Explosives
+  TNT: "TNT", Bomb: "炸弹", Nitro: "硝化甘油", Plutonium: "钚",
+  Uranium: "铀", C4: "C4炸药", Thermite: "铝热剂", Napalm: "凝固汽油",
+  // Construction
+  Brick: "砖", Concrete: "混凝土", Cement: "水泥", Tile: "瓷砖",
+  Plaster: "石膏", Marble: "大理石", Granite: "花岗岩", Basalt: "玄武岩",
+  // Magical
+  Portal: "传送门", Teleporter: "瞬移器", Antigravity: "反重力", Magnet: "磁铁",
+  Lightning: "闪电", Void: "虚空", Chaos: "混沌", Energy: "能量",
+  Shield: "护盾", Mirror: "镜子",
+  // Food
+  Bread: "面包", Cheese: "奶酪", Meat: "肉", Egg: "蛋",
+  Rice: "米", Wheat: "小麦",
+  // Nature
+  Clay: "黏土", Soil: "土壤", Peat: "泥炭", Limestone: "石灰石",
+  Chalk: "粉笔", Shale: "页岩", Slate: "板岩", Sandstone: "砂岩",
+  // Tech
+  Wire: "电线", Circuit: "电路", Battery: "电池", SolarCell: "太阳能板",
+  Laser: "激光", LED: "LED灯",
+  // Misc
+  Bubble: "泡泡", Balloon: "气球", Confetti: "彩纸", Glitter: "闪粉",
+  Spring: "弹簧", Domino: "多米诺骨牌",
+};
 
 const ElementButton = (name, selectedElement, setElement) => {
   let elementID = Species[name];
@@ -51,7 +107,7 @@ const ElementButton = (name, selectedElement, setElement) => {
       }}
     >
       {"  "}
-      {name}
+      {cnName[name] || name}
       {"  "}
     </button>
   );
@@ -71,6 +127,7 @@ class Index extends React.Component {
       dataURL: {},
       currentSubmission: null,
       selectedElement: Species.Water,
+      currentLevel: null,
     };
     window.UI = this;
     //if we start in the background, pause;
@@ -81,7 +138,30 @@ class Index extends React.Component {
       window.setTimeout(() => this.pause(), 50);
     }
 
+    // Check for level parameter
+    const params = new URLSearchParams(this.props.location.search);
+    const levelId = params.get("level");
+    if (levelId !== null) {
+      const level = levels[parseInt(levelId)];
+      if (level) {
+        this.state.currentLevel = level;
+      }
+    }
+
     this.load();
+  }
+
+  componentDidMount() {
+    if (this.state.currentLevel && this.state.currentLevel.id !== 0) {
+      window.stopboot = true;
+      reset();
+      this.state.currentLevel.setup(universe, width, height);
+      universe.flush_undos();
+      universe.push_undo();
+      this.pause();
+    } else {
+      this.play();
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -126,13 +206,27 @@ class Index extends React.Component {
     });
   }
   reset() {
-    if (window.confirm("Are you sure you want to reset?")) {
+    if (window.confirm("确定要重置吗？")) {
       this.play();
       window.location = "#";
       this.setState({ currentSubmission: null });
       reset();
     }
   }
+  restartLevel() {
+    const level = this.state.currentLevel;
+    if (!level) return;
+    this.play();
+    window.stopboot = true;
+    reset();
+    if (level.setup) {
+      level.setup(universe, width, height);
+    }
+    universe.flush_undos();
+    universe.push_undo();
+    this.pause();
+  }
+
   menu() {
     this.pause();
     this.setState({ submissionMenuOpen: true });
@@ -158,19 +252,15 @@ class Index extends React.Component {
     canvas.height = height;
     canvas.width = width;
 
-    // fill imgData with data from cells
-    // transpose for historical compatability
+    // fill imgData with data from cells (transposed for historical compatability)
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
         let cell_index = (y + x * height) * 4;
         let img_index = (x + y * width) * 4;
-        for (var i = 0; i < 4; i++) {
-          if (i % 4 == 3) {
-            imgData.data[img_index + i] = 255;
-          } else {
-            imgData.data[img_index + i] = cells[cell_index + i];
-          }
-        }
+        imgData.data[img_index] = cells[cell_index];
+        imgData.data[img_index + 1] = cells[cell_index + 1];
+        imgData.data[img_index + 2] = cells[cell_index + 2];
+        imgData.data[img_index + 3] = 255;
       }
     }
     // put data to context at (0, 0)
@@ -384,7 +474,15 @@ class Index extends React.Component {
         : "";
     return (
       <React.Fragment>
+        {this.state.currentLevel && (
+          <div className="level-badge">
+            <Link to="/levels">关卡: {this.state.currentLevel.name}</Link>
+          </div>
+        )}
         <Promotab />
+        <Link to="/menu" className="menu-btn-link">
+          <button style={{ fontSize: 16 }}>☰</button>
+        </Link>
         <button
           onClick={() => this.togglePause()}
           className={paused ? "selected" : ""}
@@ -403,26 +501,26 @@ class Index extends React.Component {
 
         {!window.location.pathname.includes("school") && (
           <>
-            <button onClick={() => this.upload()}>Upload</button>
+            <button onClick={() => this.upload()}>上传</button>
             <Link
               to={{
                 pathname: "/browse/",
                 hash,
               }}
             >
-              <button>Browse</button>
+              <button>浏览</button>
             </Link>
           </>
         )}
 
-        <button onClick={() => this.reset()}>Reset</button>
+        <button onClick={() => this.reset()}>重置</button>
         <Link
           to={{
             pathname: "/info/",
             hash,
           }}
         >
-          <button>Info</button>
+          <button>说明</button>
         </Link>
 
         {/* {paused && <button onClick={() => universe.tick()}>Tick</button>} */}
@@ -451,12 +549,12 @@ class Index extends React.Component {
         </button>
         <button
           className={-1 == selectedElement ? "selected" : ""}
-          key={name}
+          key="wind"
           onClick={() => {
             this.setState({ selectedElement: -1 });
           }}
         >
-          Wind
+          风
         </button>
         {Object.keys(Species)
           .filter((x) => !Number.isInteger(Number.parseInt(x)))
@@ -479,27 +577,39 @@ class Index extends React.Component {
             {this.state.currentSubmission.data.title}
           </div>
         )}
+        {this.state.currentLevel && (
+          <div className="level-info-bar">
+            <span className="level-name-tag">
+              {this.state.currentLevel.name}
+            </span>
+            <button onClick={() => this.restartLevel()} title="重新开始关卡">
+              ↺
+            </button>
+            <Link to="/levels" className="x">
+              <button title="返回关卡选择">✕</button>
+            </Link>
+          </div>
+        )}
 
         {this.state.submissionMenuOpen && (
           <Menu close={() => this.closeMenu()}>
-            <h4>Share your creation with the people! (try using #hashtags)</h4>
+            <h4>分享你的创作！（试试用 #标签）</h4>
             <p>
-              Please be nice. Users who post hateful or sexually explicit
-              content will be banned.
+              请友善发言，发布违规内容将被封禁。
             </p>
             <img src={this.state.data.dataURL} className="submissionImg" />
             <SignInButton>
               <div style={{ display: "flex" }}>
                 <input
                   maxlength="200"
-                  placeholder="Title"
+                  placeholder="标题"
                   onChange={(e) => this.setState({ title: e.target.value })}
                 />
                 <button
                   disabled={this.state.submitting || this.rateLimited()}
                   onClick={() => this.submit()}
                 >
-                  Submit
+                  提交
                 </button>
               </div>
             </SignInButton>

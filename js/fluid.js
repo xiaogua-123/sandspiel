@@ -193,7 +193,7 @@ function startFluid({ universe }) {
   }
 
   function startGUI() {
-    var gui = new dat.GUI({ width: 300 });
+    let gui = new dat.GUI({ width: 300 });
     gui
       .add(config, "TEXTURE_DOWNSAMPLE", { Full: 0, Half: 1, Quarter: 2 })
       .name("resolution")
@@ -473,30 +473,35 @@ function startFluid({ universe }) {
 
   let lastTime = Date.now();
 
-  // multipleSplats(parseInt(Math.random() * 20) + 5);
+  let lastBuffer = null;
+  let lastWindsPtr = null, lastBurnsPtr = null, lastCellsPtr = null;
+  let winds, burnsData, cellsData;
 
-  let winds = new Uint8Array(
-    memory.buffer,
-    universe.winds(),
-    width * height * 4
-  );
-
-  let burnsData = new Uint8Array(
-    memory.buffer,
-    universe.burns(),
-    width * height * 4
-  );
-
-  let cellsData = new Uint8Array(
-    memory.buffer,
-    universe.cells(),
-    width * height * 4
-  );
+  function ensureTypedArrays() {
+    const buf = memory.buffer;
+    const windsPtr = universe.winds();
+    const burnsPtr = universe.burns();
+    const cellsPtr = universe.cells();
+    if (buf !== lastBuffer || windsPtr !== lastWindsPtr) {
+      winds = new Uint8Array(buf, windsPtr, width * height * 4);
+      lastWindsPtr = windsPtr;
+    }
+    if (buf !== lastBuffer || burnsPtr !== lastBurnsPtr) {
+      burnsData = new Uint8Array(buf, burnsPtr, width * height * 4);
+      lastBurnsPtr = burnsPtr;
+    }
+    if (buf !== lastBuffer || cellsPtr !== lastCellsPtr) {
+      cellsData = new Uint8Array(buf, cellsPtr, width * height * 4);
+      lastCellsPtr = cellsPtr;
+    }
+    lastBuffer = buf;
+  }
+  ensureTypedArrays();
 
   function reset() {
     clearProgram.bind();
 
-    var texUnit = 0;
+    let texUnit = 0;
     gl.activeTexture(gl.TEXTURE0 + texUnit);
     gl.bindTexture(gl.TEXTURE_2D, burns[0]);
     gl.uniform1i(clearProgram.uniforms.uWind, texUnit++);
@@ -510,7 +515,7 @@ function startFluid({ universe }) {
     blit(density.write[1]);
     density.swap();
 
-    var texUnit = 0;
+    texUnit = 0;
     gl.activeTexture(gl.TEXTURE0 + texUnit);
     gl.bindTexture(gl.TEXTURE_2D, burns[0]);
     gl.uniform1i(clearProgram.uniforms.uWind, texUnit++);
@@ -542,18 +547,7 @@ function startFluid({ universe }) {
   let sync = undefined;
 
   function update() {
-    winds = new Uint8Array(memory.buffer, universe.winds(), width * height * 4);
-
-    burnsData = new Uint8Array(
-      memory.buffer,
-      universe.burns(),
-      width * height * 4
-    );
-
-    let cell_pointer = universe.cells();
-    cellsData = new Uint8Array(memory.buffer, cell_pointer, width * height * 4);
-
-    // resizeCanvas();
+    ensureTypedArrays();
 
     const dt = Math.min((Date.now() - lastTime) / 1000, 0.016);
     lastTime = Date.now();
@@ -568,7 +562,7 @@ function startFluid({ universe }) {
     // velocityWrite
     advectionProgram.bind();
 
-    var texUnit = 0;
+    let texUnit = 0;
     gl.activeTexture(gl.TEXTURE0 + texUnit);
     gl.bindTexture(gl.TEXTURE_2D, velocity.read[0]);
     gl.uniform1i(advectionProgram.uniforms.uVelocity, texUnit++);
@@ -624,7 +618,7 @@ function startFluid({ universe }) {
     // densityRead ->
     // densityWrite
 
-    var texUnit = 0;
+    texUnit = 0;
     gl.activeTexture(gl.TEXTURE0 + texUnit);
     gl.bindTexture(gl.TEXTURE_2D, burns[0]);
     gl.uniform1i(advectionProgram.uniforms.uWind, texUnit++);
@@ -662,7 +656,7 @@ function startFluid({ universe }) {
     // velocityRead -> curl
     curlProgram.bind();
 
-    var texUnit = 0;
+    texUnit = 0;
     gl.activeTexture(gl.TEXTURE0 + texUnit);
     gl.bindTexture(gl.TEXTURE_2D, velocity.read[0]);
     gl.uniform1i(curlProgram.uniforms.uVelocity, texUnit++);
@@ -682,7 +676,7 @@ function startFluid({ universe }) {
 
     vorticityProgram.bind();
 
-    var texUnit = 0;
+    texUnit = 0;
     gl.activeTexture(gl.TEXTURE0 + texUnit);
     gl.bindTexture(gl.TEXTURE_2D, velocity.read[0]);
     gl.uniform1i(vorticityProgram.uniforms.uVelocity, texUnit++);
@@ -709,7 +703,7 @@ function startFluid({ universe }) {
     // divergence
     divergenceProgram.bind();
 
-    var texUnit = 0;
+    texUnit = 0;
     gl.activeTexture(gl.TEXTURE0 + texUnit);
     gl.bindTexture(gl.TEXTURE_2D, velocity.read[0]);
     gl.uniform1i(divergenceProgram.uniforms.uVelocity, texUnit++);
@@ -728,7 +722,7 @@ function startFluid({ universe }) {
     // pressureWrite
     clearProgram.bind();
 
-    var texUnit = 0;
+    texUnit = 0;
     gl.activeTexture(gl.TEXTURE0 + texUnit);
     gl.bindTexture(gl.TEXTURE_2D, burns[0]);
     gl.uniform1i(clearProgram.uniforms.uWind, texUnit++);
@@ -756,7 +750,7 @@ function startFluid({ universe }) {
     // pressureWrite
     pressureProgram.bind();
     //TODO
-    var texUnit = 0;
+    texUnit = 0;
     gl.activeTexture(gl.TEXTURE0 + texUnit);
     gl.bindTexture(gl.TEXTURE_2D, divergence[0]);
     gl.uniform1i(pressureProgram.uniforms.uDivergence, texUnit++);
@@ -786,7 +780,7 @@ function startFluid({ universe }) {
     // velocityOut
     velocityOutProgram.bind();
 
-    var texUnit = 0;
+    texUnit = 0;
     gl.activeTexture(gl.TEXTURE0 + texUnit);
     gl.bindTexture(gl.TEXTURE_2D, velocity.read[0]);
     gl.uniform1i(velocityOutProgram.uniforms.uTexture, texUnit++);
@@ -821,7 +815,7 @@ function startFluid({ universe }) {
     // velocityWrite
     gradientSubtractProgram.bind();
 
-    var texUnit = 0;
+    texUnit = 0;
     gl.activeTexture(gl.TEXTURE0 + texUnit);
     gl.bindTexture(gl.TEXTURE_2D, burns[0]);
     gl.uniform1i(gradientSubtractProgram.uniforms.uWind, texUnit++);
@@ -857,7 +851,7 @@ function startFluid({ universe }) {
     // null/renderbuffer?
     displayProgram.bind();
 
-    var texUnit = 0;
+    texUnit = 0;
     gl.activeTexture(gl.TEXTURE0 + texUnit);
     gl.bindTexture(gl.TEXTURE_2D, density.read[0]);
     gl.uniform1i(displayProgram.uniforms.uTexture, texUnit++);
@@ -870,7 +864,7 @@ function startFluid({ universe }) {
   function splat(x, y, dx, dy, color) {
     splatProgram.bind();
 
-    var texUnit = 0;
+    let texUnit = 0;
     gl.activeTexture(gl.TEXTURE0 + texUnit);
     gl.bindTexture(gl.TEXTURE_2D, velocity.read[0]);
     gl.uniform1i(splatProgram.uniforms.uTarget, texUnit++);

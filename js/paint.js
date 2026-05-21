@@ -2,29 +2,9 @@ import { height, universe, width } from "./index.js";
 import { sizeMap } from "./components/ui";
 const canvas = document.getElementById("sand-canvas");
 
-const eventDistance = (a, b) => {
-  return Math.sqrt(
-    Math.pow(a.clientX - b.clientX, 2) + Math.pow(a.clientY - b.clientY, 2),
-    2
-  );
-};
-
-const magnitude = (a) => {
-  return Math.sqrt(Math.pow(a.clientX, 2) + Math.pow(a.clientY, 2), 2);
-};
-
-const norm = (a) => {
-  let mag = magnitude(a);
-  return { clientX: a.clientX / mag, clientY: a.clientY / mag };
-};
-const scale = (a, s) => {
-  return { clientX: a.clientX * s, clientY: a.clientY * s };
-};
-const add = (a, b) => {
-  return { clientX: a.clientX + b.clientX, clientY: a.clientY + b.clientY };
-};
-const sub = (a, b) => {
-  return { clientX: a.clientX - b.clientX, clientY: a.clientY - b.clientY };
+const dist = (a, b) => {
+  const dx = a.clientX - b.clientX, dy = a.clientY - b.clientY;
+  return Math.sqrt(dx * dx + dy * dy);
 };
 
 let painting = false;
@@ -92,29 +72,25 @@ canvas.addEventListener("touchmove", (event) => {
 function smoothPaint(event) {
   clearInterval(repeat);
   repeat = window.setInterval(() => paint(event), 100);
-  let startEvent = { clientX: event.clientX, clientY: event.clientY };
-  if (!painting) {
-    return;
-  }
+  if (!painting) return;
+
   let size = sizeMap[window.UI.state.size];
-  let i = 0;
   let step = Math.max(size / 5, 1);
   if (lastPaint) {
-    while (eventDistance(startEvent, lastPaint) > step) {
-      let d = eventDistance(startEvent, lastPaint);
-      lastPaint = add(
-        lastPaint,
-        scale(norm(sub(lastPaint, event)), -Math.min(step, d))
-      );
+    const sx = lastPaint.clientX, sy = lastPaint.clientY;
+    const ex = event.clientX, ey = event.clientY;
+    const totalDist = dist(lastPaint, event);
+    let traveled = 0;
+    let i = 0;
+    while (traveled + step < totalDist) {
+      traveled += step;
+      const t = traveled / totalDist;
+      paint({ clientX: sx + (ex - sx) * t, clientY: sy + (ey - sy) * t });
       i++;
-      if (i > 1000) {
-        break;
-      }
-      paint(lastPaint);
+      if (i > 1000) break;
     }
   }
-  paint(startEvent);
-
+  paint(event);
   lastPaint = event;
 }
 

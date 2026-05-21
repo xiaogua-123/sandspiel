@@ -113,7 +113,13 @@ renderLoop();
 window.u = universe;
 
 if (!isBench) {
-  boot(width, height);
+  // Check if a level was specified - skip boot in that case
+  const levelParam = new URLSearchParams(window.location.search).get("level");
+  if (levelParam === null || levelParam === "0") {
+    boot(width, height);
+  } else {
+    window.stopboot = true;
+  }
 }
 
 function reset() {

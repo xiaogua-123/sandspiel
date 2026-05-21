@@ -3,88 +3,502 @@ import React from "react";
 const Info = () => {
   return (
     <div className="Info">
-      <h1>Sandspiel </h1>
-      <p>
-        Created by <a href="https://maxbittker.com">max bittker</a>
-      </p>
+      <h1>Sandspiel</h1>
+      <p>原作者 <a href="https://maxbittker.com">max bittker</a></p>
       <hr />
       <br />
+      <p>欢迎！希望你能喜欢这个小小的游戏，愿你从中获得平静与快乐。</p>
       <p>
-        Welcome, and thanks for coming by! I hope that you enjoy exploring this
-        small game, and it brings you some calm.{" "}
-      </p>
-      <p>
-        Growing up, "falling sand" games like this one provided me hours of
-        entertainment and imagination. I want to particularly thank ha55ii's{" "}
-        <a href="https://dan-ball.jp/en/javagame/dust/">Powder Game</a> as the
-        primary inspiration for sandspiel.
+        作者小时候就是玩着这种"落沙游戏"长大的，它们带来了无数欢乐和想象力。
+        特别感谢 ha55ii 的{" "}
+        <a href="https://dan-ball.jp/en/javagame/dust/">Powder Game</a>，
+        它是 sandspiel 的主要灵感来源。
       </p>
       <br />
       <p>
-        If you want to read more the inspiration, architecture, and history of
-        the game, I wrote a blog post (it gets technical in the middle):&nbsp;
+        如果你想了解更多关于游戏的灵感、架构和历史，可以阅读作者的博客文章：
         <a href="https://maxbittker.com/making-sandspiel">Making Sandspiel</a>
       </p>
       <br />
       <p>
-        If you'd like, you can view the{" "}
-        <a href="https://github.com/maxbittker/sandspiel">source code</a> or{" "}
-        <a href="https://github.com/maxbittker/sandspiel/issues">report bugs</a>{" "}
-        on github or feel free to reach out on twitter and I'll try to answer!
-      </p>
-      <br />
-      <p>
-        Lastly, I want to say that if you enjoy this game or share your artwork
-        on it, your opinion is important to me and I want to do my best to
-        ensure sandspiel is a friendly and kind place to play, without bullying,
-        racism, transphobia, homophobia, or any other forms of bigotry. If something is wrong or there's some way I can
-        help, feel free to contact me at <a href="mailto:maxbittker@gmail.com">maxbittker@gmail.com</a> or <a href="https://twitter.com/maxbittker">@maxbittker on twitter.</a>
+        你可以在
+        <a href="https://github.com/maxbittker/sandspiel">GitHub</a>
+        上查看源代码或
+        <a href="https://github.com/maxbittker/sandspiel/issues">报告问题</a>。
       </p>
       <br />
       <hr />
       <br />
-      <h2>Element Information:</h2>
-      <h4>Wall </h4>
-      Indestructible.
-      <h4>Sand </h4>
-      Sinks in water.
-      <h4>Water </h4>
-      Puts out fire.
-      <h4>Stone </h4>
-      Forms arches, turns into sand under pressure.
-      <h4>Ice </h4>
-      Freezes Water, slippery!
-      <h4>Gas </h4>
-      Highly Flammable!
-      <h4>Cloner </h4>
-      Copies the first element it touches. 
-      <h4>Mite </h4>
-      Eats wood and plant, but loves dust! Slides on ice..
-      <h4>Wood </h4>
-      Sturdy, but biodegradable.
-      <h4>Plant </h4>
-      Thrives in wet enviroments.
-      <h4>Fungus </h4>
-      Spreads over everything.
-      <h4>Seed </h4>
-      Grows on sand, plant, and fungus.
-      <h4>Fire </h4>
-      Hot!
-      <h4>Lava </h4>
-      Flammable and heavy.
-      <h4>Acid </h4>
-      Corrodes other elements.
-      <h4>Dust </h4>
-      Pretty, but dangerously explosive.
-      <h4>Oil </h4>
-      Produces smoke when set on fire.
-      <h4>Rocket </h4>
-      Explodes into copies of the first element it touches.
-      <h4>Empty </h4>
-      Erases.
+      <h2>基础元素：</h2>
+
+      <h4>墙 (Wall)</h4>
+      <p>不可摧毁的屏障。</p>
+
+      <h4>沙 (Sand)</h4>
+      <p>会沉入水中，基本的粒子元素。</p>
+
+      <h4>水 (Water)</h4>
+      <p>可以灭火，流动性强。</p>
+
+      <h4>石 (Stone)</h4>
+      <p>能形成拱形结构，在高压下会碎成沙。</p>
+
+      <h4>冰 (Ice)</h4>
+      <p>可以冻结水，表面光滑！</p>
+
+      <h4>气 (Gas)</h4>
+      <p>高度易燃，会向上飘散。</p>
+
+      <h4>复制器 (Cloner)</h4>
+      <p>复制它接触到的第一个元素。</p>
+
+      <h4>虫 (Mite)</h4>
+      <p>吃木头和植物，特别喜欢灰尘！会在冰上滑行。</p>
+
+      <h4>木 (Wood)</h4>
+      <p>坚固但可燃，水可以保护它。</p>
+
+      <h4>植物 (Plant)</h4>
+      <p>在潮湿环境中茁壮成长。</p>
+
+      <h4>菌 (Fungus)</h4>
+      <p>会在所有东西上蔓延生长。</p>
+
+      <h4>种子 (Seed)</h4>
+      <p>在沙地、植物和真菌上生长成植物。</p>
+
+      <h4>火 (Fire)</h4>
+      <p>高温！可燃物靠近会被点燃。</p>
+
+      <h4>岩浆 (Lava)</h4>
+      <p>高温且沉重，遇水会变成石头。</p>
+
+      <h4>酸 (Acid)</h4>
+      <p>腐蚀其他元素，但对墙无效。</p>
+
+      <h4>尘 (Dust)</h4>
+      <p>漂亮但危险！遇高压会爆炸燃烧。</p>
+
+      <h4>油 (Oil)</h4>
+      <p>燃烧时会产生浓烟，浮于水面。</p>
+
+      <h4>火箭 (Rocket)</h4>
+      <p>会爆炸并复制它接触到的第一个元素。</p>
+
+      <h4>空 (Empty)</h4>
+      <p>橡皮擦，用于清除元素。</p>
+
       <hr />
+      <br />
+      <h2>新增基础元素：</h2>
+
+      <h4>雪 (Snow)</h4>
+      <p>轻盈的白色粉末，会在水中漂浮。遇火或岩浆融化成水，遇高压也会熔化。</p>
+
+      <h4>海绵 (Sponge)</h4>
+      <p>可以吸收周围的水和油，吸收后颜色变深。挤压海绵可以挤出水分，湿海绵可以防火。</p>
+
+      <h4>史莱姆 (Slime)</h4>
+      <p>粘性物质，会缓慢下落并在表面摊开。具有弹性，遇水会被冲走，遇酸会溶解。</p>
+
+      <h4>玻璃 (Glass)</h4>
+      <p>坚硬透明，高温下会熔化成岩浆。遇高压会碎成沙，酸会缓慢腐蚀玻璃。</p>
+
+      <h4>珊瑚 (Coral)</h4>
+      <p>在水中生长，附着在固体表面。会向上生长并向侧边分支，离开水会慢慢变成石头。</p>
+
       <hr />
+      <br />
+      <h2>金属元素：</h2>
+
+      <h4>铁 (Iron)</h4>
+      <p>沉重的金属，在水中会生锈缓慢分解。极端高温下熔化。</p>
+
+      <h4>铜 (Copper)</h4>
+      <p>导热性好，遇酸会缓慢腐蚀变色。</p>
+
+      <h4>金 (Gold)</h4>
+      <p>非常致密的惰性金属，几乎不与其他元素反应，会沉入任何液体中。</p>
+
+      <h4>银 (Silver)</h4>
+      <p>漂亮的白色金属，遇酸会变色腐蚀。</p>
+
+      <h4>铝 (Aluminum)</h4>
+      <p>轻质金属，中等温度即可熔化。密度低，不会沉入所有液体。</p>
+
+      <h4>铅 (Lead)</h4>
+      <p>非常重的有毒金属，会污染附近的水源变成毒药。高温可熔化。</p>
+
+      <h4>锌 (Zinc)</h4>
+      <p>脆性金属，遇酸剧烈反应产生气体。</p>
+
+      <h4>锡 (Tin)</h4>
+      <p>软质金属，熔点较低。</p>
+
+      <h4>青铜 (Bronze)</h4>
+      <p>铜锡合金，坚固耐腐蚀。比纯金属更耐热。</p>
+
+      <h4>钢 (Steel)</h4>
+      <p>最坚固的金属材料，非常耐热。几乎无法被摧毁。</p>
+
       <hr />
+      <br />
+      <h2>宝石水晶：</h2>
+
+      <h4>钻石 (Diamond)</h4>
+      <p>最坚硬的物质，极难碎裂。极端高温才会熔化。</p>
+
+      <h4>红宝石 (Ruby)</h4>
+      <p>美丽的红色宝石，能将激光放大（产生发光效果）。</p>
+
+      <h4>蓝宝石 (Sapphire)</h4>
+      <p>深蓝色坚硬的宝石，耐高温高压。</p>
+
+      <h4>绿宝石 (Emerald)</h4>
+      <p>翠绿色宝石，比红蓝宝石略脆。</p>
+
+      <h4>紫水晶 (Amethyst)</h4>
+      <p>紫色水晶，美丽的装饰性宝石。</p>
+
+      <h4>石英 (Quartz)</h4>
+      <p>压电晶体，高压下会产生微小火花。</p>
+
+      <h4>水晶 (Crystal)</h4>
+      <p>透明晶体，较脆易碎，高温熔化后变成玻璃。</p>
+
+      <h4>黑曜石 (Obsidian)</h4>
+      <p>火山玻璃，锐利且坚硬。遇水冷却开裂成石头，高压碎成尖利碎片。</p>
+
+      <hr />
+      <br />
+      <h2>粉末元素：</h2>
+
+      <h4>火药 (Gunpowder)</h4>
+      <p>极度易燃易爆！遇火、岩浆或闪电立即爆炸，产生连锁反应。</p>
+
+      <h4>面粉 (Flour)</h4>
+      <p>细粉末，空气中遇到火花会产生粉尘爆炸。遇水变成泥浆。</p>
+
+      <h4>糖 (Sugar)</h4>
+      <p>甜味粉末，溶于水，遇热焦化燃烧。</p>
+
+      <h4>盐 (Salt)</h4>
+      <p>不可燃，溶于水。撒在冰上可以加速冰块融化！</p>
+
+      <h4>胡椒 (Pepper)</h4>
+      <p>刺激性粉末，浮在水面上不下沉。</p>
+
+      <h4>灰烬 (Ash)</h4>
+      <p>燃烧后的残余物，非常轻，随风飘散。不可再燃。</p>
+
+      <h4>烟灰 (Soot)</h4>
+      <p>粘性的黑色粉末，会附着在表面上。</p>
+
+      <h4>木炭 (Charcoal)</h4>
+      <p>缓慢燃烧的燃料，点燃后持续闷烧产热。</p>
+
+      <hr />
+      <br />
+      <h2>更多液体：</h2>
+
+      <h4>泥浆 (Mud)</h4>
+      <p>厚重的泥水混合物，流动缓慢。干燥后会变成土壤。</p>
+
+      <h4>血液 (Blood)</h4>
+      <p>略粘稠的红色液体，会吸引虫类。长时间会干涸。</p>
+
+      <h4>蜂蜜 (Honey)</h4>
+      <p>非常粘稠的金色液体，流动极慢。易燃，会吸引蚂蚁。</p>
+
+      <h4>牛奶 (Milk)</h4>
+      <p>白色液体，可以中和酸！遇热会变质。</p>
+
+      <h4>毒药 (Poison)</h4>
+      <p>致命的绿色液体，接触有机生物会将其杀死。</p>
+
+      <h4>水银 (Mercury)</h4>
+      <p>非常重的液态金属，会溶解金（汞齐反应）。</p>
+
+      <h4>酒精 (Alcohol)</h4>
+      <p>高度易燃的透明液体，遇火猛烈燃烧。会逐渐挥发成气体。</p>
+
+      <h4>糖浆 (Syrup)</h4>
+      <p>极度粘稠的甜味液体，流动非常缓慢。</p>
+
+      <hr />
+      <br />
+      <h2>更多气体：</h2>
+
+      <h4>蒸汽 (Steam)</h4>
+      <p>水蒸气，上升并加热周围。遇冰或雪凝结成水。</p>
+
+      <h4>烟雾 (Smoke)</h4>
+      <p>燃烧产生的烟，上升并逐渐消散。</p>
+
+      <h4>氦气 (Helium)</h4>
+      <p>极轻的惰性气体，快速上升，不可燃。</p>
+
+      <h4>氯气 (Chlorine)</h4>
+      <p>黄绿色有毒气体，比空气重，向下沉。对生物致命！</p>
+
+      <h4>氧气 (Oxygen)</h4>
+      <p>助燃气体，会让附近的火焰燃烧得更旺。被火焰消耗。</p>
+
+      <h4>氢气 (Hydrogen)</h4>
+      <p>最轻的气体，极度易燃易爆！遇火或闪电产生猛烈爆炸。</p>
+
+      <h4>等离子 (PlasmaGas)</h4>
+      <p>超高温电离气体，摧毁几乎所有接触到的物质。寿命短暂。</p>
+
+      <h4>甲烷 (Methane)</h4>
+      <p>可燃气体，上升扩散。遇火爆炸。</p>
+
+      <hr />
+      <br />
+      <h2>更多有机物：</h2>
+
+      <h4>树叶 (Leaf)</h4>
+      <p>轻质可燃，缓慢飘落。干燥易燃。</p>
+
+      <h4>花朵 (Flower)</h4>
+      <p>美丽的装饰物，吸引蜜蜂和蝴蝶传播种子。</p>
+
+      <h4>草 (Grass)</h4>
+      <p>在土壤或沙地上横向蔓延生长，需要水分。</p>
+
+      <h4>藤蔓 (Vine)</h4>
+      <p>沿墙壁和木头向上攀爬生长。</p>
+
+      <h4>苔藓 (Moss)</h4>
+      <p>附着在表面上生长，需要水分为生。缺水会枯萎。</p>
+
+      <h4>蘑菇 (Mushroom)</h4>
+      <p>在木头、真菌或土壤上生长扩散孢子。</p>
+
+      <h4>树皮 (Bark)</h4>
+      <p>坚硬的外层保护，耐火性比普通木头更强。烧完变成木炭。</p>
+
+      <h4>根 (Root)</h4>
+      <p>向下生长入土壤，吸收水分滋养植物。</p>
+
+      <h4>果实 (Fruit)</h4>
+      <p>成熟后会落下，可食用。腐烂后释放种子。</p>
+
+      <h4>荆棘 (Thorn)</h4>
+      <p>尖锐的防御性植物，触碰小型生物会将其杀死。</p>
+
+      <hr />
+      <br />
+      <h2>小生物：</h2>
+
+      <h4>蚂蚁 (Ant)</h4>
+      <p>吃糖、蜂蜜、面包和果实。会跟随其他蚂蚁形成路径。</p>
+
+      <h4>蜘蛛 (Spider)</h4>
+      <p>捕食蚂蚁、蜜蜂、蝴蝶和蠕虫。能在墙上攀爬。</p>
+
+      <h4>蜜蜂 (Bee)</h4>
+      <p>在花朵间传粉，采蜜后能量恢复。偏好向上飞行。</p>
+
+      <h4>蝴蝶 (Butterfly)</h4>
+      <p>随机飞舞，为花朵传粉。飞行轨迹飘忽不定。</p>
+
+      <h4>鱼 (Fish)</h4>
+      <p>必须生活在水中的生物，吃种子和水生植物。离开水会死亡。</p>
+
+      <h4>鸟 (Bird)</h4>
+      <p>捕食种子、虫类和果实。能飞向上方。</p>
+
+      <h4>蛇 (Snake)</h4>
+      <p>捕食小型生物包括虫、蚂蚁、蜘蛛、鱼或蛋。</p>
+
+      <h4>蠕虫 (Worm)</h4>
+      <p>生活在土壤中，钻洞松土。吃腐烂的有机物。</p>
+
+      <hr />
+      <br />
+      <h2>爆炸物/危险品：</h2>
+
+      <h4>TNT</h4>
+      <p>经典炸药，遇火、岩浆、闪电或高压冲击即引爆，产生强大冲击波。</p>
+
+      <h4>炸弹 (Bomb)</h4>
+      <p>定点爆炸物，需要火焰引燃。比TNT威力更大。</p>
+
+      <h4>硝化甘油 (Nitro)</h4>
+      <p>极度不稳定的液体炸药！任何冲击、热量甚至轻微压力都会引爆。威力最大！</p>
+
+      <h4>钚 (Plutonium)</h4>
+      <p>放射性元素，持续产生热量，会点燃周围物质。</p>
+
+      <h4>铀 (Uranium)</h4>
+      <p>放射性元素，比钚活性稍低，但同样危险。</p>
+
+      <h4>C4炸药 (C4)</h4>
+      <p>稳定的塑性炸药，只有火焰才能引爆。平时像沙子一样安全。</p>
+
+      <h4>铝热剂 (Thermite)</h4>
+      <p>点燃后产生超高温度，能熔化穿透下方所有物质变成岩浆。</p>
+
+      <h4>凝固汽油 (Napalm)</h4>
+      <p>粘性燃烧剂，点燃后附着表面持续燃烧，四处扩散火焰。</p>
+
+      <hr />
+      <br />
+      <h2>建筑材料：</h2>
+
+      <h4>砖 (Brick)</h4>
+      <p>坚固的建筑材料，高压下会碎裂。</p>
+
+      <h4>混凝土 (Concrete)</h4>
+      <p>非常坚固的现代建材，抗压耐热。</p>
+
+      <h4>水泥 (Cement)</h4>
+      <p>粉末状，遇水会凝固硬化成混凝土。干燥时像沙子。</p>
+
+      <h4>瓷砖 (Tile)</h4>
+      <p>硬质装饰建材，清脆易碎。</p>
+
+      <h4>石膏 (Plaster)</h4>
+      <p>软质建材，遇水溶解成泥浆，酸可轻易破坏。</p>
+
+      <h4>大理石 (Marble)</h4>
+      <p>美丽的装饰石材，酸会缓慢腐蚀它。</p>
+
+      <h4>花岗岩 (Granite)</h4>
+      <p>非常坚硬的天然石材，高度抗压耐热。</p>
+
+      <h4>玄武岩 (Basalt)</h4>
+      <p>最强天然建筑石材，耐热性极高。由冷却的岩浆形成。</p>
+
+      <hr />
+      <br />
+      <h2>魔法/特殊元素：</h2>
+
+      <h4>传送门 (Portal)</h4>
+      <p>将接触到它的粒子随机传送到附近位置。</p>
+
+      <h4>瞬移器 (Teleporter)</h4>
+      <p>接触物质后将其传送到随机方向。</p>
+
+      <h4>反重力 (Antigravity)</h4>
+      <p>产生向上的力场，让周围物体漂浮上升。</p>
+
+      <h4>磁铁 (Magnet)</h4>
+      <p>吸引铁、铜、钢等金属元素向自己靠拢。</p>
+
+      <h4>闪电 (Lightning)</h4>
+      <p>向下方放出强力电击，击中物质产生等离子体和火焰。</p>
+
+      <h4>虚空 (Void)</h4>
+      <p>吞噬一切接触到的物质（除墙和护盾外）。缓慢消散。</p>
+
+      <h4>混沌 (Chaos)</h4>
+      <p>随机将周围元素转换为其他种类，完全不可预测！</p>
+
+      <h4>能量 (Energy)</h4>
+      <p>纯能量体，会扩散并为电池、太阳能板充能。逐渐消散。</p>
+
+      <h4>护盾 (Shield)</h4>
+      <p>不可穿越的防护罩，能抵挡虚空、火、岩浆和酸。随时间弱化消失。</p>
+
+      <h4>镜子 (Mirror)</h4>
+      <p>反射激光束，将其弹回相反方向。</p>
+
+      <hr />
+      <br />
+      <h2>食物：</h2>
+
+      <h4>面包 (Bread)</h4>
+      <p>美味的食物，遇火烤焦燃烧。在水中会变湿软。</p>
+
+      <h4>奶酪 (Cheese)</h4>
+      <p>乳制品，遇热熔化成油。虫子和蚂蚁爱吃！</p>
+
+      <h4>肉 (Meat)</h4>
+      <p>生肉，遇火会烤熟再烧焦。吸引蜘蛛、蛇和鸟等肉食动物。长时间会腐烂。</p>
+
+      <h4>蛋 (Egg)</h4>
+      <p>脆弱易碎，受冲击会破裂。温暖环境中会孵化出小鸟。</p>
+
+      <h4>米 (Rice)</h4>
+      <p>小颗粒谷物，吸水膨胀。遇火轻燃。</p>
+
+      <h4>小麦 (Wheat)</h4>
+      <p>作物，在土壤上生长向上。干燥易燃。</p>
+
+      <hr />
+      <br />
+      <h2>自然材料：</h2>
+
+      <h4>黏土 (Clay)</h4>
+      <p>可塑性泥土，遇火烧烤变成砖块。吸水变软。</p>
+
+      <h4>土壤 (Soil)</h4>
+      <p>肥沃的大地基础，种子可以在上面扎根生长。能保持水分。</p>
+
+      <h4>泥炭 (Peat)</h4>
+      <p>有机质丰富的土壤，特别适合种子发芽。易燃。</p>
+
+      <h4>石灰石 (Limestone)</h4>
+      <p>沉积岩，遇酸迅速溶解。遇水缓慢侵蚀。</p>
+
+      <h4>粉笔 (Chalk)</h4>
+      <p>最软的岩石，遇酸立即溶解。低压即碎成粉末。</p>
+
+      <h4>页岩 (Shale)</h4>
+      <p>层状沉积岩，高压下裂成沙子。</p>
+
+      <h4>板岩 (Slate)</h4>
+      <p>变质岩，比页岩更坚固。光滑平坦。</p>
+
+      <h4>砂岩 (Sandstone)</h4>
+      <p>沙粒胶结而成的岩石，多孔隙。遇水缓慢分解，高压碎回沙子。</p>
+
+      <hr />
+      <br />
+      <h2>科技元素：</h2>
+
+      <h4>电线 (Wire)</h4>
+      <p>固定导体，接触到能量或闪电时会将能量传到另一端。过热熔化。</p>
+
+      <h4>电路 (Circuit)</h4>
+      <p>处理能量输入并将其放大输出。遇水会短路起火。</p>
+
+      <h4>电池 (Battery)</h4>
+      <p>储存能量并缓慢释放。能量充满后向周围放能。遇火爆炸。</p>
+
+      <h4>太阳能板 (SolarCell)</h4>
+      <p>顶部阳光充足时自动产生能量，向下输出。</p>
+
+      <h4>激光 (Laser)</h4>
+      <p>向固定方向射出高能光束，烧穿路径上的物质。短暂存在。</p>
+
+      <h4>LED灯 (LED)</h4>
+      <p>通电后发光！漂亮的电子装饰品。</p>
+
+      <hr />
+      <br />
+      <h2>趣味元素：</h2>
+
+      <h4>泡泡 (Bubble)</h4>
+      <p>轻盈漂浮，触碰任何物体即破裂消失。自然消散。</p>
+
+      <h4>气球 (Balloon)</h4>
+      <p>充气后上升，碰壁反弹。遇火爆炸。</p>
+
+      <h4>彩纸 (Confetti)</h4>
+      <p>缤纷彩色纸片，随机飞舞飘落。易燃。</p>
+
+      <h4>闪粉 (Glitter)</h4>
+      <p>闪亮的微小颗粒，飘落极慢，随风舞动。</p>
+
+      <h4>弹簧 (Spring)</h4>
+      <p>有弹性的装置！上方落下的物体会被弹飞得更高。</p>
+
+      <h4>多米诺骨牌 (Domino)</h4>
+      <p>站立的小牌，被相邻倒下的牌推倒时产生连锁反应。</p>
+
       <hr />
     </div>
   );

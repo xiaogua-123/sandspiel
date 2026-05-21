@@ -61,6 +61,7 @@ module.exports = (env, argv) => {
     },
     devServer: {
       static: dist,
+      port: 8080,
       allowedHosts: "all",
       historyApiFallback: true,
     },

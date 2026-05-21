@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 
 import Info from "./components/info";
 import { Index } from "./components/ui";
@@ -9,8 +9,8 @@ import Admin from "./components/admin";
 import Menu from "./components/menu";
 import SignInScreen from "./components/signin";
 import BenchmarkRunner from "./components/benchmarkRunner";
-
-let sizeMap = [2, 5, 10, 18, 30, 45];
+import MainMenu from "./components/MainMenu";
+import LevelSelect from "./components/LevelSelect";
 
 function BrowseRouter({ match, location }) {
   return (
@@ -39,11 +39,14 @@ function SigninRouter({ match, location }) {
 function AppRouter() {
   return (
     <Router>
-      <Route path="/" component={Index} />
+      <Route exact path="/menu" component={MainMenu} />
+      <Route exact path="/levels" component={LevelSelect} />
+
+      <Route exact path="/" component={Index} />
       <Route
         exact
         path="/info/"
-        component={() => (
+        render={() => (
           <Menu>
             <Info />
           </Menu>
@@ -59,5 +62,3 @@ function AppRouter() {
 }
 
 ReactDOM.render(<AppRouter />, document.getElementById("ui"));
-
-export { sizeMap };

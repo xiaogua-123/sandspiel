@@ -1,7 +1,6 @@
 const reglBuilder = require("regl");
 import * as wasm from "../crate/pkg/sandtable_bg.wasm";
-import { Species } from "../crate/pkg/sandtable";
-import { Universe } from "../crate/pkg";
+import { Species, Universe } from "../crate/pkg/sandtable";
 const memory = wasm.memory;
 
 let fsh = require("./glsl/sand.glsl");

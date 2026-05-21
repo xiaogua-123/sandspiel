@@ -21,7 +21,7 @@ const fps = new (class {
     this.lastFrameTimeStamp = now;
     const fps = (1 / delta) * 1000;
 
-    // Save only the latest 100 timings.
+    // Save only the latest 30 timings.
     this.frames.push(fps);
     if (this.frames.length > 30) {
       this.frames.shift();
@@ -43,26 +43,14 @@ const fps = new (class {
       gtag("event", "fps", {
         value: Math.round(mean),
       });
-      if (mean < 50) {
-        gtag("event", "fps-L50", {
-          value: Math.round(mean),
-        });
-      }
-
-      if (mean < 40) {
-        gtag("event", "fps-L40", {
-          value: Math.round(mean),
-        });
-      }
-      if (mean < 30) {
-        gtag("event", "fps-L30", {
-          value: Math.round(mean),
-        });
-      }
       if (mean < 20) {
-        gtag("event", "fps-L20", {
-          value: Math.round(mean),
-        });
+        gtag("event", "fps-L20", { value: Math.round(mean) });
+      } else if (mean < 30) {
+        gtag("event", "fps-L30", { value: Math.round(mean) });
+      } else if (mean < 40) {
+        gtag("event", "fps-L40", { value: Math.round(mean) });
+      } else if (mean < 50) {
+        gtag("event", "fps-L50", { value: Math.round(mean) });
       }
     }
     // Render the statistics.
