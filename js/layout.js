@@ -1,5 +1,5 @@
 // Window resize and layout handler / 窗口大小调整和布局处理器
-// Positions canvases responsively for landscape and portrait orientations / 响应式定位画布，适配横屏和竖屏
+// Positions canvases responsively for landscape and portrait / 响应式定位画布，适配横屏和竖屏
 
 let resizeTimer = null;
 const RESIZE_DEBOUNCE_MS = 100; // Debounce delay in ms / 防抖延迟（毫秒）
@@ -9,7 +9,6 @@ let resize = () => {
   resizeTimer = setTimeout(performResize, RESIZE_DEBOUNCE_MS);
 };
 
-// Calculate and apply canvas sizing for landscape vs portrait / 计算并应用横屏与竖屏的画布尺寸
 function performResize() {
   const canvas = document.getElementById("sand-canvas");
   const canvas2 = document.getElementById("fluid-canvas");
@@ -17,26 +16,32 @@ function performResize() {
 
   if (!canvas || !canvas2 || !ui) return;
 
-  const screen_width = window.innerWidth;
-  const screen_height = window.innerHeight;
-  const ui_rect = ui.getBoundingClientRect();
+  let screen_width = window.innerWidth;
+  let uiheight = 50;
+  let screen_height = window.innerHeight - uiheight;
 
   let canvasStyle = "";
   let uiStyle = "";
 
   if (screen_width > screen_height) {
     // Landscape mode / 横屏模式
-    const ui_width = ui_rect.width || 0;
-    const canvas_size = Math.min(screen_height - 4, screen_width - ui_width - 16);
-    canvasStyle = `height: ${canvas_size}px; width: ${canvas_size}px; margin: 2px;`;
-    if (ui_width > 200) {
-      canvasStyle += ` left: auto; right: ${ui_width + 6}px;`;
+    if (screen_width - window.innerHeight < 400) {
+      // Compressed landscape / 压缩横屏：画布占满高度，UI 占剩余宽度
+      canvasStyle = `height: ${window.innerHeight}px; margin:3px`;
+      uiStyle = `width: ${screen_width - window.innerHeight - 12}px; margin: 2px;`;
+    } else {
+      // Wide landscape / 宽横屏：方形画布居左，UI 固定 200px 宽
+      canvasStyle = `
+       height: ${window.innerHeight}px;
+       width:${window.innerHeight}px;
+       margin:0;
+       left: auto;
+       right: 206px`;
+      uiStyle = `width: 200px; margin: 2px;`;
     }
-    uiStyle = "";
   } else {
-    // Portrait (mobile) / 竖屏（移动端）
-    const max_size = Math.min(screen_width, screen_height - (ui_rect.height || 50));
-    canvasStyle = `width: ${max_size}px; height: ${max_size}px; margin: auto; bottom: 0;`;
+    // Portrait (mobile) / 竖屏（移动端）：画布宽度占满屏幕
+    canvasStyle = `width: ${screen_width}px; bottom:3px;`;
     uiStyle = "";
   }
 
@@ -44,11 +49,10 @@ function performResize() {
   canvas.style = canvasStyle;
   canvas2.style = canvasStyle;
 
-  // Update pull tab position
+  // Update pull tab position / 更新下拉标签位置
+  let btnHeight = ui.getBoundingClientRect().height;
   const pullTabContent = document.getElementById("PullTabContent");
-  if (pullTabContent) {
-    pullTabContent.style.top = Math.max(ui_rect.height || 10, 10) + "px";
-  }
+  if (pullTabContent) pullTabContent.style.top = btnHeight + "px";
 }
 
 if (document.readyState === 'loading') {
@@ -57,8 +61,8 @@ if (document.readyState === 'loading') {
   resize();
 }
 
-window.addEventListener("resize", resize);
 window.addEventListener("deviceorientation", resize, true);
+window.addEventListener("resize", resize);
 
 // Observe UI element size changes (e.g., element bar expanding) / 监听UI元素大小变化（如元素栏展开）
 if (window.ResizeObserver) {
