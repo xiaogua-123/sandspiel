@@ -9,156 +9,156 @@ let vsh = require("./glsl/sandVertex.glsl");
 // HSV color definitions for all 136 element types [Hue, Saturation, Lightness]
 // Each value encoded as byte (0-255), decoded in shader as /255.0
 const SPECIES_HSV_BYTES = new Uint8Array([
-  0,25,25, // 0: Empty
-  25,25,102, // 1: Wall
-  25,127,153, // 2: Sand
-  153,127,179, // 3: Water
-  0,51,179, // 4: Gas
-  229,76,127, // 5: Cloner
-  13,179,179, // 6: Fire
-  25,76,76, // 7: Wood
-  20,204,179, // 8: Lava
-  153,102,179, // 9: Ice
-  229,102,255, // 10: Snow
-  102,102,102, // 11: Plant
-  46,229,204, // 12: Acid
-  179,25,51, // 13: Stone (hue offset -0.4=0.6*255=153, but base is -0.4 which wraps)
-  0,102,204, // 14: Dust
-  204,229,204, // 15: Mite
-  25,51,76, // 16: Oil
-  0,102,229, // 17: Rocket
-  20,25,204, // 18: Fungus
-  229,179,179, // 19: Seed
-  31,76,127, // 20: Sponge
-  76,179,127, // 21: Slime
-  148,25,217, // 22: Glass
-  13,179,153, // 23: Coral
+  0,0,20,     // 0: Empty (nearly invisible)
+  0,5,100,    // 1: Wall (neutral gray)
+  30,220,170, // 2: Sand (warm golden)
+  150,200,160,// 3: Water (clear blue)
+  0,5,230,    // 4: Gas (faint white)
+  195,180,170,// 5: Cloner (violet-purple)
+  15,255,200, // 6: Fire (bright warm orange)
+  22,190,80,  // 7: Wood (rich brown)
+  10,255,220, // 8: Lava (bright red-orange glow)
+  145,140,230,// 9: Ice (icy light blue)
+  0,10,250,   // 10: Snow (bright white)
+  80,210,100, // 11: Plant (vivid green)
+  52,240,185, // 12: Acid (bright yellow-green)
+  0,10,130,   // 13: Stone (neutral gray)
+  28,120,160, // 14: Dust (warm tan)
+  215,140,185,// 15: Mite (pinkish)
+  18,190,35,  // 16: Oil (dark brown-black)
+  0,235,205,  // 17: Rocket (bright red)
+  195,130,145,// 18: Fungus (purple-gray)
+  26,160,105, // 19: Seed (brown)
+  45,150,205, // 20: Sponge (warm yellow)
+  75,210,150, // 21: Slime (vivid green)
+  150,35,225, // 22: Glass (transparent blue-white)
+  5,170,185,  // 23: Coral (warm pink)
   // Metals 24-33
-  20,38,115, // 24: Iron
-  25,153,127, // 25: Copper
-  36,204,140, // 26: Gold
-  153,13,179, // 27: Silver
-  153,20,153, // 28: Aluminum
-  166,25,76, // 29: Lead
-  31,51,127, // 30: Zinc
-  25,38,140, // 31: Tin
-  28,179,102, // 32: Bronze
-  153,13,89, // 33: Steel
+  10,35,95,   // 24: Iron (dark metallic gray)
+  18,210,140, // 25: Copper (warm copper-orange)
+  38,240,170, // 26: Gold (rich gold)
+  0,8,195,    // 27: Silver (bright silver)
+  0,10,180,   // 28: Aluminum (light silver)
+  155,30,82,  // 29: Lead (dark blue-gray)
+  145,25,155, // 30: Zinc (silvery blue-gray)
+  0,15,170,   // 31: Tin (soft silver-white)
+  22,210,120, // 32: Bronze (warm bronze)
+  150,28,105, // 33: Steel (dark blue-gray metallic)
   // Crystals 34-41
-  153,0,229, // 34: Diamond
-  0,229,153, // 35: Ruby
-  153,204,127, // 36: Sapphire
-  76,204,127, // 37: Emerald
-  204,153,153, // 38: Amethyst
-  20,25,204, // 39: Quartz
-  140,51,191, // 40: Crystal
-  0,13,38, // 41: Obsidian
+  0,5,245,    // 34: Diamond (brilliant white sparkle)
+  0,255,135,  // 35: Ruby (deep blood red)
+  168,225,135,// 36: Sapphire (deep royal blue)
+  100,230,105,// 37: Emerald (deep green)
+  200,185,155,// 38: Amethyst (rich purple)
+  40,10,235,  // 39: Quartz (milky white)
+  150,55,205, // 40: Crystal (light blue crystal)
+  185,35,32,  // 41: Obsidian (dark violet-black)
   // Powders 42-49
-  31,25,51, // 42: Gunpowder
-  33,25,217, // 43: Flour
-  31,13,229, // 44: Sugar
-  0,0,217, // 45: Salt
-  20,51,64, // 46: Pepper
-  25,13,102, // 47: Ash
-  0,13,38, // 48: Soot
-  20,25,38, // 49: Charcoal
+  0,15,55,    // 42: Gunpowder (dark charcoal)
+  38,35,245,  // 43: Flour (creamy off-white)
+  35,18,245,  // 44: Sugar (sparkly white)
+  0,5,245,    // 45: Salt (pure white)
+  18,85,42,   // 46: Pepper (dark brown-black)
+  0,10,162,   // 47: Ash (medium gray)
+  0,8,22,     // 48: Soot (near black)
+  0,18,38,    // 49: Charcoal (dark gray-black)
   // Liquids 50-57
-  31,102,64, // 50: Mud
-  0,229,76, // 51: Blood
-  36,204,153, // 52: Honey
-  31,13,229, // 53: Milk
-  89,229,127, // 54: Poison
-  153,13,153, // 55: Mercury
-  153,25,204, // 56: Alcohol
-  25,179,115, // 57: Syrup
+  22,135,72,  // 50: Mud (wet brown)
+  0,255,82,   // 51: Blood (deep red)
+  36,235,172, // 52: Honey (warm amber gold)
+  32,12,250,  // 53: Milk (creamy white)
+  62,250,142, // 54: Poison (toxic green)
+  0,8,182,    // 55: Mercury (liquid silver)
+  0,5,242,    // 56: Alcohol (clear)
+  22,200,125, // 57: Syrup (thick amber)
   // Gases 58-65
-  153,13,229, // 58: Steam
-  20,13,89, // 59: Smoke
-  153,5,242, // 60: Helium
-  64,127,153, // 61: Chlorine
-  140,25,204, // 62: Oxygen
-  153,5,242, // 63: Hydrogen
-  179,229,229, // 64: PlasmaGas
-  38,51,179, // 65: Methane
+  0,8,245,    // 58: Steam (white vapor)
+  0,13,95,    // 59: Smoke (medium gray)
+  0,5,250,    // 60: Helium (barely visible)
+  58,210,182, // 61: Chlorine (yellow-green toxic)
+  150,35,225, // 62: Oxygen (pale blue)
+  0,5,250,    // 63: Hydrogen (barely visible)
+  205,255,232,// 64: PlasmaGas (bright violet glow)
+  28,65,182,  // 65: Methane (pale brown)
   // Organics 66-75
-  64,179,102, // 66: Leaf
-  0,204,179, // 67: Flower
-  76,179,89, // 68: Grass
-  71,153,76, // 69: Vine
-  76,127,76, // 70: Moss
-  25,76,140, // 71: Mushroom
-  25,102,64, // 72: Bark
-  25,76,51, // 73: Root
-  13,204,127, // 74: Fruit
-  20,76,76, // 75: Thorn
+  82,215,112, // 66: Leaf (vibrant leaf green)
+  210,230,210,// 67: Flower (bright pink-magenta)
+  78,210,92,  // 68: Grass (fresh grass green)
+  88,175,82,  // 69: Vine (darker vine green)
+  70,155,72,  // 70: Moss (deep moss green)
+  24,110,152, // 71: Mushroom (warm tan)
+  20,125,72,  // 72: Bark (dark tree bark)
+  22,105,60,  // 73: Root (earthy brown)
+  8,235,162,  // 74: Fruit (bright red)
+  18,110,82,  // 75: Thorn (dark woody)
   // Creatures 76-83
-  25,127,51, // 76: Ant
-  0,25,38, // 77: Spider
-  36,204,127, // 78: Bee
-  0,204,153, // 79: Butterfly
-  140,153,127, // 80: Fish
-  20,127,115, // 81: Bird
-  76,153,89, // 82: Snake
-  20,102,102, // 83: Worm
+  15,35,30,   // 76: Ant (dark brown-black)
+  0,15,22,    // 77: Spider (deep black)
+  44,235,170, // 78: Bee (bright yellow-black)
+  210,215,188,// 79: Butterfly (vivid purple-pink)
+  145,155,162,// 80: Fish (silver-blue)
+  5,165,155,  // 81: Bird (warm red)
+  80,175,102, // 82: Snake (olive green)
+  12,72,135,  // 83: Worm (pink-brown)
   // Explosives 84-91
-  31,179,102, // 84: TNT
-  18,76,51, // 85: Bomb
-  33,102,153, // 86: Nitro
-  102,204,102, // 87: Plutonium
-  89,179,89, // 88: Uranium
-  31,76,127, // 89: C4
-  20,179,179, // 90: Thermite
-  20,204,127, // 91: Napalm
+  0,240,125,  // 84: TNT (bold red)
+  0,25,58,    // 85: Bomb (dark iron gray)
+  48,255,185, // 86: Nitro (bright yellow)
+  78,255,142, // 87: Plutonium (radioactive green glow)
+  52,240,162, // 88: Uranium (yellow-green glow)
+  38,35,182,  // 89: C4 (pale tan)
+  14,255,205, // 90: Thermite (intense orange)
+  18,240,172, // 91: Napalm (orange-red gel)
   // Construction 92-99
-  13,153,102, // 92: Brick
-  25,13,127, // 93: Concrete
-  31,20,140, // 94: Cement
-  20,127,127, // 95: Tile
-  25,13,204, // 96: Plaster
-  153,8,191, // 97: Marble
-  20,25,115, // 98: Granite
-  153,13,46, // 99: Basalt
+  8,190,112,  // 92: Brick (warm red-brown)
+  0,8,162,    // 93: Concrete (cool gray)
+  35,12,182,  // 94: Cement (light warm gray)
+  12,135,155, // 95: Tile (terracotta)
+  30,8,232,   // 96: Plaster (warm white)
+  35,5,222,   // 97: Marble (elegant white)
+  15,18,142,  // 98: Granite (speckled gray)
+  0,18,52,    // 99: Basalt (dark volcanic)
   // Magical 100-109
-  0,229,153, // 100: Portal
-  204,204,127, // 101: Teleporter
-  140,179,153, // 102: Antigravity
-  153,102,102, // 103: Magnet
-  38,127,229, // 104: Lightning
-  204,127,13, // 105: Void
-  0,229,153, // 106: Chaos
-  140,229,204, // 107: Energy
-  140,153,127, // 108: Shield
-  153,8,217, // 109: Mirror
+  195,255,155,// 100: Portal (deep purple swirl)
+  172,210,182,// 101: Teleporter (electric blue)
+  148,185,205,// 102: Antigravity (cyan-blue)
+  0,165,135,  // 103: Magnet (red pole)
+  46,255,245, // 104: Lightning (brilliant yellow-white)
+  0,0,5,      // 105: Void (absolute black)
+  0,255,182,  // 106: Chaos (shifting rainbow base)
+  148,255,225,// 107: Energy (bright cyan-blue plasma)
+  155,112,205,// 108: Shield (translucent blue)
+  0,5,222,    // 109: Mirror (pure silver reflective)
   // Food 110-115
-  31,127,140, // 110: Bread
-  36,179,153, // 111: Cheese
-  8,179,102, // 112: Meat
-  33,76,191, // 113: Egg
-  36,51,204, // 114: Rice
-  36,179,127, // 115: Wheat
+  28,195,162, // 110: Bread (golden brown crust)
+  44,220,202, // 111: Cheese (rich yellow)
+  2,225,125,  // 112: Meat (fresh red-pink)
+  42,85,225,  // 113: Egg (pale yellow)
+  35,10,242,  // 114: Rice (white)
+  36,210,172, // 115: Wheat (golden amber)
   // Nature 116-123
-  20,102,115, // 116: Clay
-  25,102,64, // 117: Soil
-  23,127,38, // 118: Peat
-  31,20,166, // 119: Limestone
-  31,8,217, // 120: Chalk
-  25,25,76, // 121: Shale
-  153,20,64, // 122: Slate
-  31,76,140, // 123: Sandstone
+  12,140,135, // 116: Clay (warm red-brown)
+  24,125,72,  // 117: Soil (dark rich earth)
+  23,105,42,  // 118: Peat (dark organic)
+  34,30,195,  // 119: Limestone (pale warm gray)
+  36,8,245,   // 120: Chalk (bright white)
+  18,42,92,   // 121: Shale (dark layered gray)
+  158,22,85,  // 122: Slate (blue-gray)
+  28,135,152, // 123: Sandstone (warm tan)
   // Tech 124-129
-  20,127,102, // 124: Wire
-  153,102,76, // 125: Circuit
-  38,153,115, // 126: Battery
-  140,153,102, // 127: SolarCell
-  0,0,255, // 128: Laser
-  0,229,204, // 129: LED
+  18,215,142, // 124: Wire (copper orange)
+  82,190,112, // 125: Circuit (PCB green)
+  50,210,155, // 126: Battery (yellow-gold)
+  170,185,102,// 127: SolarCell (dark blue)
+  0,255,255,  // 128: Laser (pure bright red)
+  120,255,225,// 129: LED (bright cyan-green)
   // Misc 130-135
-  153,25,204, // 130: Bubble
-  0,204,179, // 131: Balloon
-  0,229,191, // 132: Confetti
-  0,127,204, // 133: Glitter
-  31,102,140, // 134: Spring
-  18,127,127, // 135: Domino
+  155,55,232, // 130: Bubble (iridescent light blue)
+  220,225,210,// 131: Balloon (bright pink-red)
+  52,250,210, // 132: Confetti (bright yellow)
+  40,255,225, // 133: Glitter (golden sparkle)
+  0,12,162,   // 134: Spring (metallic gray)
+  0,10,95,    // 135: Domino (dark with white dots)
 ]);
 
 const NUM_SPECIES = 136;
