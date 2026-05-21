@@ -32,11 +32,6 @@ pub struct Wind {
     pressure: u8, // air pressure / 气压
     density: u8,  // fluid density / 流体密度
 }
-    dx: u8,
-    dy: u8,
-    pressure: u8,
-    density: u8,
-}
 
 /// A single cell in the simulation grid.
 /// / 模拟网格中的单个单元格。
