@@ -1,3 +1,6 @@
+// WebGL rendering with regl / 使用regl进行WebGL渲染
+// Manages HSV color table, sand texture, snapshot export, and color palette generation / 管理HSV颜色表、沙子纹理、截图导出和调色板生成
+
 const reglBuilder = require("regl");
 import * as wasm from "../crate/pkg/sandtable_bg.wasm";
 import { Species, Universe } from "../crate/pkg/sandtable";
@@ -161,8 +164,11 @@ const SPECIES_HSV_BYTES = new Uint8Array([
   0,10,95,    // 135: Domino (dark with white dots)
 ]);
 
+// Total number of element species in the game / 游戏中元素种类的总数
 const NUM_SPECIES = 136;
 
+// Initialize WebGL renderer with regl / 初始化WebGL渲染器
+// Sets up data texture from WASM memory and HSV color table as 1D texture / 从WASM内存设置数据纹理，HSV颜色表作为1D纹理上传
 let startWebGL = ({ canvas, universe, isSnapshot = false }) => {
   const regl = reglBuilder({
     canvas,
@@ -170,11 +176,12 @@ let startWebGL = ({ canvas, universe, isSnapshot = false }) => {
   });
   const width = universe.width();
   const height = universe.height();
+  // Direct WASM memory view of cell grid / WASM内存中细胞网格的直接视图
   let cell_pointer = universe.cells();
   let cells = new Uint8Array(memory.buffer, cell_pointer, width * height * 4);
   const dataTexture = regl.texture({ width, height, data: cells });
 
-  // Upload HSV color table as a 1D texture (136 pixels wide)
+  // Upload HSV color table as a 1D texture (136 pixels wide) / 将HSV颜色表作为1D纹理上传（136像素宽）
   const hsvTexture = regl.texture({
     width: NUM_SPECIES,
     height: 1,
@@ -197,12 +204,14 @@ let startWebGL = ({ canvas, universe, isSnapshot = false }) => {
         viewportWidth,
         viewportHeight,
       ],
+      // DPI multiplier for crisp grid rendering / DPI乘数用于清晰网格渲染
       dpi: window.devicePixelRatio * 2,
       isSnapshot,
     },
 
     vert: vsh,
     attributes: {
+      // Large triangle covering entire viewport for full-screen quad / 覆盖整个视口的大三角形，用于全屏四边形
       position: [
         [-1, 4],
         [-1, -1],
@@ -218,6 +227,7 @@ let startWebGL = ({ canvas, universe, isSnapshot = false }) => {
   };
 };
 
+// Capture a PNG snapshot of the current universe / 截取当前宇宙的PNG截图
 let snapshot = (universe) => {
   let canvas = document.createElement("canvas");
   canvas.width = universe.width() / 2;
@@ -228,6 +238,7 @@ let snapshot = (universe) => {
   return canvas.toDataURL("image/png");
 };
 
+// Generate CSS color map for each species via GPU rendering / 通过GPU渲染为每个元素生成CSS颜色映射
 let pallette = () => {
   let canvas = document.createElement("canvas");
 

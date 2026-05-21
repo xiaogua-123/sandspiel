@@ -1,7 +1,11 @@
+// Main menu screen / 主菜单界面
+// Landing page with links to play, levels, and info / 包含开始游戏、关卡选择、游戏说明链接的启动页
+
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const MainMenu = () => {
+  // Pause the simulation when entering the menu / 进入菜单时暂停模拟
   useEffect(() => {
     window.paused = true;
   }, []);

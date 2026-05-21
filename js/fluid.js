@@ -1,33 +1,19 @@
-// MIT License
-
-// Copyright (c) 2017 Pavel Dobryakov
-
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+// Fluid simulation engine / 流体模拟引擎
+// GPU-based fluid dynamics adapted from Pavel Dobryakov's WebGL-Fluid-Simulation / 基于GPU的流体动力学，改编自Pavel Dobryakov的WebGL-Fluid-Simulation
+// Handles velocity advection, pressure solving, vorticity, and density splatting / 处理速度对流、压力求解、涡旋和密度溅射
+//
+// MIT License, Copyright (c) 2017 Pavel Dobryakov
 "use strict";
 import * as dat from "dat.gui";
 import * as wasm from "../crate/pkg/sandtable_bg.wasm";
 import { compileShaders } from "./fluidShaders";
+// WASM memory buffer for reading wind/burn/cell data / 用于读取风/燃烧/细胞数据的WASM内存缓冲区
 const memory = wasm.memory;
 const canvas = document.getElementById("fluid-canvas");
 const sandCanvas = document.getElementById("sand-canvas");
 
 let fluidColor = [1, 1, 0.8];
+// Detect iOS for PBO workaround (iOS WebGL has broken PBO support) / 检测iOS以使用PBO替代方案（iOS WebGL的PBO支持有bug）
 function iOS() {
   return (
     [
@@ -44,11 +30,14 @@ function iOS() {
 }
 
 const isIOS = iOS();
+
+// Main entry: initialize fluid simulation with WebGL context / 主入口：使用WebGL上下文初始化流体模拟
 function startFluid({ universe }) {
   canvas.width = universe.width();
   canvas.height = universe.height();
+  // Fluid simulation parameters, adjustable via dat.GUI / 流体模拟参数，可通过dat.GUI调整
   let config = {
-    TEXTURE_DOWNSAMPLE: 0,
+    TEXTURE_DOWNSAMPLE: 0,    // 0=full, 1=half, 2=quarter resolution / 0=全分辨率, 1=半, 2=四分之一
     DENSITY_DISSIPATION: 0.98,
     VELOCITY_DISSIPATION: 0.99,
     PRESSURE_DISSIPATION: 0.8,
@@ -78,6 +67,7 @@ function startFluid({ universe }) {
   } = compileShaders(gl);
   startGUI();
 
+  // Acquire WebGL2 or WebGL1 context with float texture support / 获取支持浮点纹理的WebGL2或WebGL1上下文
   function getWebGLContext(canvas) {
     const params = {
       alpha: false,
@@ -140,6 +130,7 @@ function startFluid({ universe }) {
     };
   }
 
+  // Fallback chain for unsupported render texture formats / 不支持的渲染纹理格式的回退链
   function getSupportedFormat(gl, internalFormat, format, type) {
     if (!supportRenderTextureFormat(gl, internalFormat, format, type)) {
       switch (internalFormat) {
@@ -297,6 +288,7 @@ function startFluid({ universe }) {
     gradientSubtractShader
   );
 
+  // Create/recreate all framebuffers for the simulation passes / 创建/重新创建模拟过程所需的所有帧缓冲
   function initFramebuffers() {
     texWidth = gl.drawingBufferWidth >> config.TEXTURE_DOWNSAMPLE;
     texHeight = gl.drawingBufferHeight >> config.TEXTURE_DOWNSAMPLE;
@@ -416,6 +408,7 @@ function startFluid({ universe }) {
     return [texture, fbo, texId];
   }
 
+  // Ping-pong FBO pair for read/write swapping / 乒乓帧缓冲对，用于读写交换
   function createDoubleFBO(texId, w, h, internalFormat, format, type, param) {
     let fbo1 = createFBO(texId, w, h, internalFormat, format, type, param);
     let fbo2 = createFBO(texId + 1, w, h, internalFormat, format, type, param);
@@ -477,6 +470,7 @@ function startFluid({ universe }) {
   let lastWindsPtr = null, lastBurnsPtr = null, lastCellsPtr = null;
   let winds, burnsData, cellsData;
 
+  // Refresh WASM memory views when buffer is reallocated / 当缓冲区重新分配时刷新WASM内存视图
   function ensureTypedArrays() {
     const buf = memory.buffer;
     const windsPtr = universe.winds();
@@ -498,6 +492,7 @@ function startFluid({ universe }) {
   }
   ensureTypedArrays();
 
+  // Clear velocity, density, and pressure buffers / 清除速度、密度和压力缓冲区
   function reset() {
     clearProgram.bind();
 
@@ -546,9 +541,11 @@ function startFluid({ universe }) {
 
   let sync = undefined;
 
+  // Main simulation step: advection, curl, vorticity, divergence, pressure, display / 主模拟步骤：对流、旋度、涡度、散度、压力、显示
   function update() {
     ensureTypedArrays();
 
+    // Clamp delta time to prevent instability from large steps / 钳制时间差以防止大步长导致不稳定
     const dt = Math.min((Date.now() - lastTime) / 1000, 0.016);
     lastTime = Date.now();
 
@@ -792,6 +789,8 @@ function startFluid({ universe }) {
     // gl.uniform1i(velocityOutProgram.uniforms.uTexture, velocity.read[2]);
     // gl.uniform1i(velocityOutProgram.uniforms.uPressure, pressure.read[2]);
     blit(velocityOut[1]);
+    // Read velocity output back to CPU for WASM wind data / 将速度输出读回CPU以获取WASM风数据
+    // WebGL2 uses PBO async read; iOS falls back to synchronous readPixels / WebGL2使用PBO异步读取；iOS回退到同步readPixels
     if (!isWebGL2 || isIOS) {
       gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, winds);
     } else if (sync === undefined) {
@@ -807,12 +806,9 @@ function startFluid({ universe }) {
       }
     }
 
-    // GRADIENT SUBTRACT
-    // burns
-    // pressureRead
-    // velocityRead
-    // sands ->
-    // velocityWrite
+    // GRADIENT SUBTRACT / 梯度减法
+    // Modifies velocity based on pressure gradient, only where solid cells exist / 根据压力梯度修改速度，仅在存在固体细胞的位置
+    // burns -> pressureRead -> velocityRead -> cells -> velocityWrite
     gradientSubtractProgram.bind();
 
     texUnit = 0;
@@ -861,6 +857,7 @@ function startFluid({ universe }) {
     blit(null);
   }
 
+  // Inject velocity and density at a point (mouse/touch interaction) / 在一点注入速度和密度（鼠标/触控交互）
   function splat(x, y, dx, dy, color) {
     splatProgram.bind();
 
@@ -897,6 +894,7 @@ function startFluid({ universe }) {
     density.swap();
   }
 
+  // Create random splats for testing / 创建随机溅射用于测试
   function multipleSplats(amount) {
     for (let i = 0; i < amount; i++) {
       const color = fluidColor;

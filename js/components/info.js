@@ -1,3 +1,6 @@
+// Element documentation and game info page / 元素文档和游戏信息页面
+// Displays descriptions for all 136 element types in Chinese / 用中文展示所有136种元素类型的描述
+
 import React from "react";
 
 const Info = () => {

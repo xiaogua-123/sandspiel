@@ -1,3 +1,6 @@
+// React Router application setup / React Router应用配置
+// Defines all routes and mounts the React tree into the DOM / 定义所有路由并将React树挂载到DOM中
+
 import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter as Router, Route } from "react-router-dom";
@@ -36,6 +39,7 @@ function SigninRouter({ match, location }) {
   );
 }
 
+// Top-level router with all page routes / 顶层路由器，包含所有页面路由
 function AppRouter() {
   return (
     <Router>

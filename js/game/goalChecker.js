@@ -1,11 +1,16 @@
+// Goal checking logic for levels / 关卡目标检查逻辑
+// Scans cell grid to verify CLEAR_ALL or CREATE goals / 扫描细胞网格以验证清除全部或创建目标
+
 import * as wasm from "../../crate/pkg/sandtable_bg.wasm";
 const memory = wasm.memory;
 
+// Only check goals every N ticks to save performance / 每隔N帧检查目标以节省性能
 const GOAL_CHECK_INTERVAL = 30;
 let tickCounter = 0;
 let goalAchieved = false;
 let highestCount = 0;
 
+// Check if level goal is met by counting target species cells / 通过计数目标元素细胞来检查关卡目标是否达成
 function checkGoal(goal, universe, width, height) {
   if (!goal || goalAchieved) return goalAchieved;
 
@@ -46,6 +51,7 @@ function checkGoal(goal, universe, width, height) {
   return goalAchieved;
 }
 
+// Reset goal tracking state for a new level / 重置关卡目标追踪状态
 function resetGoalState() {
   tickCounter = 0;
   goalAchieved = false;

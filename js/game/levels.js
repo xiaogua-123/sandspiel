@@ -1,3 +1,6 @@
+// Level definitions with goals and setup logic / 关卡定义，包含目标和初始化逻辑
+// Each level specifies initial state via setup() and win condition via goal{} / 每个关卡通过setup()指定初始状态，通过goal{}指定胜利条件
+
 import { Species } from "../../crate/pkg/sandtable";
 
 const GoalType = {
@@ -6,18 +9,18 @@ const GoalType = {
 };
 
 /**
- * Level definition format:
+ * Level definition format / 关卡定义格式:
  * {
  *   id: number,
  *   name: string,
  *   description: string,
  *   difficulty: 1-5,
- *   setup: (universe, width, height) => void,  // paint initial state
- *   goal?: { type, species, target?, label }    // win condition
+ *   setup: (universe, width, height) => void,  // Paint initial state / 绘制初始状态
+ *   goal?: { type, species, target?, label }    // Win condition / 胜利条件
  * }
  */
 
-// Helper to paint a rectangular region with random fill
+// Helper to paint a rectangular region with random fill / 用随机填充绘制矩形区域的辅助函数
 function fillRect(u, x1, y1, x2, y2, species, size) {
   for (let x = x1; x <= x2; x++) {
     for (let y = y1; y <= y2; y++) {

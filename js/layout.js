@@ -1,11 +1,15 @@
+// Window resize and layout handler / 窗口大小调整和布局处理器
+// Positions canvases responsively for landscape and portrait orientations / 响应式定位画布，适配横屏和竖屏
+
 let resizeTimer = null;
-const RESIZE_DEBOUNCE_MS = 100;
+const RESIZE_DEBOUNCE_MS = 100; // Debounce delay in ms / 防抖延迟（毫秒）
 
 let resize = () => {
   if (resizeTimer) clearTimeout(resizeTimer);
   resizeTimer = setTimeout(performResize, RESIZE_DEBOUNCE_MS);
 };
 
+// Calculate and apply canvas sizing for landscape vs portrait / 计算并应用横屏与竖屏的画布尺寸
 function performResize() {
   const canvas = document.getElementById("sand-canvas");
   const canvas2 = document.getElementById("fluid-canvas");
@@ -21,7 +25,7 @@ function performResize() {
   let uiStyle = "";
 
   if (screen_width > screen_height) {
-    // Landscape mode
+    // Landscape mode / 横屏模式
     const ui_width = ui_rect.width || 0;
     const canvas_size = Math.min(screen_height - 4, screen_width - ui_width - 16);
     canvasStyle = `height: ${canvas_size}px; width: ${canvas_size}px; margin: 2px;`;
@@ -30,7 +34,7 @@ function performResize() {
     }
     uiStyle = "";
   } else {
-    // Portrait (mobile)
+    // Portrait (mobile) / 竖屏（移动端）
     const max_size = Math.min(screen_width, screen_height - (ui_rect.height || 50));
     canvasStyle = `width: ${max_size}px; height: ${max_size}px; margin: auto; bottom: 0;`;
     uiStyle = "";
@@ -56,7 +60,7 @@ if (document.readyState === 'loading') {
 window.addEventListener("resize", resize);
 window.addEventListener("deviceorientation", resize, true);
 
-// Observe UI element size changes (e.g., element bar expanding)
+// Observe UI element size changes (e.g., element bar expanding) / 监听UI元素大小变化（如元素栏展开）
 if (window.ResizeObserver) {
   const ui_element = document.getElementById("ui");
   if (ui_element) {

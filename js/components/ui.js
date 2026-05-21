@@ -1,3 +1,6 @@
+// Main React UI component / 主React UI组件
+// Renders element buttons, pause/play, brush size, level UI, submission menu, and victory overlay / 渲染元素按钮、暂停/播放、画笔大小、关卡UI、提交菜单和胜利弹窗
+
 import React from "react";
 import { Link } from "react-router-dom";
 import * as Sentry from "@sentry/browser";
@@ -18,8 +21,10 @@ import { resetGoalState } from "../game/goalChecker";
 import Menu from "./menu";
 
 window.species = Species;
+// Pre-compute color palette for element buttons / 预计算元素按钮的颜色调色板
 let pallette_data = pallette();
 
+// Chinese name mapping for all element species / 所有元素种类的中文名称映射
 const cnName = {
   Empty: "空", Wall: "墙", Sand: "沙", Water: "水",
   Stone: "石", Ice: "冰", Gas: "气", Cloner: "复制",
@@ -75,6 +80,7 @@ const cnName = {
   Spring: "弹簧", Domino: "多米诺骨牌",
 };
 
+// Render a single element button with color swatch / 渲染带有颜色色块的单个元素按钮
 const ElementButton = (name, selectedElement, setElement) => {
   let elementID = Species[name];
 
@@ -82,8 +88,9 @@ const ElementButton = (name, selectedElement, setElement) => {
   let selected = elementID == selectedElement;
 
   let background = "inherit";
+  // Element 14 (Dust) gets a rainbow gradient / 元素14（尘）使用彩虹渐变
   if (elementID == 14) {
-    background = `linear-gradient(45deg, 
+    background = `linear-gradient(45deg,
     rgba(202, 121, 125, 0.25), 
     rgba(169, 120, 200, 0.25), 
     rgba(117, 118, 195, 0.25), 
@@ -114,6 +121,7 @@ const ElementButton = (name, selectedElement, setElement) => {
   );
 };
 
+// Brush radius options, used as pixel radius for paint() / 笔刷半径选项，用作paint()的像素半径
 let sizeMap = [1, 3, 7, 19, 39];
 
 class Index extends React.Component {
@@ -132,7 +140,7 @@ class Index extends React.Component {
       showVictory: false,
     };
     window.UI = this;
-    //if we start in the background, pause;
+    // If started on a non-main page (e.g., browse), pause initially / 如果在非主页启动（如浏览页），初始暂停
     if (
       this.props.location.pathname !== "/" &&
       this.props.location.pathname !== "/school"
@@ -140,7 +148,7 @@ class Index extends React.Component {
       window.setTimeout(() => this.pause(), 50);
     }
 
-    // Check for level parameter
+    // Check for level parameter in URL / 检查URL中的关卡参数
     const params = new URLSearchParams(this.props.location.search);
     const levelId = params.get("level");
     if (levelId !== null) {
@@ -153,6 +161,7 @@ class Index extends React.Component {
     this.load();
   }
 
+  // Set up goal-achieved callback and initialize level if specified / 设置目标达成回调，如果指定了关卡则初始化
   componentDidMount() {
     window.onGoalAchieved = () => {
       this.pause();
@@ -195,19 +204,23 @@ class Index extends React.Component {
       this.load();
     }
   }
+  // Toggle pause state of simulation / 切换模拟的暂停状态
   togglePause() {
     window.paused = !this.state.paused;
     this.setState({ paused: !this.state.paused });
   }
+  // Resume simulation / 恢复模拟
   play() {
     window.paused = false;
     this.setState({ paused: false });
   }
+  // Pause simulation / 暂停模拟
   pause() {
     window.paused = true;
     this.setState({ paused: true });
   }
 
+  // Set brush size by index into sizeMap / 通过索引设置笔刷大小
   setSize(event, size) {
     event.preventDefault();
     this.setState({
@@ -222,6 +235,7 @@ class Index extends React.Component {
       reset();
     }
   }
+  // Restart current level with fresh setup / 重新开始当前关卡
   restartLevel() {
     const level = this.state.currentLevel;
     if (!level) return;
@@ -250,6 +264,7 @@ class Index extends React.Component {
     this.play();
     this.setState({ submissionMenuOpen: false });
   }
+  // Create snapshot and open submission menu / 创建截图并打开提交菜单
   upload() {
     let dataURL = snapshot(universe);
     const cells = new Uint8Array(
@@ -266,9 +281,10 @@ class Index extends React.Component {
     canvas.height = height;
     canvas.width = width;
 
-    // fill imgData with data from cells (transposed for historical compatability)
+    // Fill imgData with data from cells (transposed for historical compatibility) / 用细胞数据填充imgData（转置以兼容历史格式）
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
+        // Cell grid is column-major: index = (y + x * height), image is row-major: index = (x + y * width) / 细胞网格列优先：index = (y + x * height)，图像行优先：index = (x + y * width)
         let cell_index = (y + x * height) * 4;
         let img_index = (x + y * width) * 4;
         imgData.data[img_index] = cells[cell_index];
@@ -288,6 +304,7 @@ class Index extends React.Component {
       submissionMenuOpen: true,
     });
   }
+  // Check if user exceeded post rate limit (3 per 5 min) / 检查用户是否超过发帖频率限制（5分钟3次）
   rateLimited() {
     var postList = JSON.parse(localStorage.getItem("postList") || "[]");
     postList = postList.filter((post) => Date.now() - 1000 * 60 * 5 < post);
@@ -298,6 +315,7 @@ class Index extends React.Component {
     }
     return false;
   }
+  // Submit creation to server / 向服务器提交创作
   submit() {
     let { title, data, currentSubmission } = this.state;
 
@@ -343,6 +361,7 @@ class Index extends React.Component {
     });
   }
 
+  // Parse and load an SVG string as pixel art into the universe / 解析并将SVG字符串加载为像素画到宇宙中
   async loadSVG(svgString) {
     const imgData = await svgToImageData(svgString);
 
@@ -362,10 +381,10 @@ class Index extends React.Component {
         imgData.data[i + 2],
         imgData.data[i + 3]
       );
-      cellsData[i] = species; // should be 0 to 19
-      cellsData[i + 1] = Math.floor(100 + Math.random() * 50); // register A
-      cellsData[i + 2] = 0; // register B
-      cellsData[i + 3] = 0; // clock
+      cellsData[i] = species; // Species ID / 元素ID
+      cellsData[i + 1] = Math.floor(100 + Math.random() * 50); // Register A (variant data) / 寄存器A（变体数据）
+      cellsData[i + 2] = 0; // Register B (flags) / 寄存器B（标志）
+      cellsData[i + 3] = 0; // Clock (tick counter) / 时钟（滴答计数）
     }
     universe.flush_undos();
     universe.push_undo();
@@ -373,6 +392,7 @@ class Index extends React.Component {
     this.pause();
   }
 
+  // Load a shared creation from URL hash / 从URL哈希加载共享创作
   load() {
     let { location } = this.props;
     let id = location.hash.replace(/#/, "");
@@ -414,6 +434,7 @@ class Index extends React.Component {
                   canvas.height = height;
                   var ctx = canvas.getContext("2d");
 
+                  // Rotate -90deg and flip horizontally to match canvas orientation / 旋转-90度并水平翻转以匹配画布方向
                   ctx.translate(canvas.width / 2, canvas.height / 2);
                   ctx.rotate((-90 * Math.PI) / 180);
                   ctx.scale(-1, 1.0);
@@ -451,6 +472,7 @@ class Index extends React.Component {
         console.error("Error:", error);
       });
   }
+  // Increment vote score for current submission / 为当前作品增加投票分数
   incScore() {
     let { currentSubmission } = this.state;
     let { id } = currentSubmission;

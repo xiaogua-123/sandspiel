@@ -1,7 +1,11 @@
+// Level selection grid / 关卡选择网格
+// Displays all levels as cards with difficulty ratings / 以卡片形式展示所有关卡及其难度评级
+
 import React from "react";
 import { Link } from "react-router-dom";
 import levels from "../game/levels";
 
+// Render star rating string from difficulty level (1-5) / 根据难度等级(1-5)渲染星级字符串
 const difficultyStars = (n) => "★".repeat(n) + "☆".repeat(5 - n);
 
 const LevelSelect = () => {

@@ -1,3 +1,6 @@
+// Game loop and initialization / 游戏主循环与初始化
+// Coordinates WASM universe, WebGL rendering, fluid sim, input, and level goals / 协调WASM宇宙、WebGL渲染、流体模拟、输入和关卡目标
+
 import * as Sentry from "@sentry/browser";
 import { Integrations } from "@sentry/tracing";
 import { Wasm as WasmIntegration } from "@sentry/wasm";
@@ -29,6 +32,7 @@ import {} from "./layout";
 import { checkGoal, resetGoalState, isGoalAchieved } from "./game/goalChecker";
 
 const isBench = window.location.pathname === "/bench";
+// Safari back-button hijack to prevent accidental navigation / Safari返回按钮劫持，防止意外导航
 if (window.safari) {
   history.pushState(null, null, location.href);
   window.onpopstate = function (event) {
@@ -36,6 +40,7 @@ if (window.safari) {
   };
 }
 
+// Detect mobile/tablet devices via user agent / 通过用户代理检测移动/平板设备
 function mobileAndTabletcheck() {
   var check = false;
   (function (a) {
@@ -72,6 +77,7 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+// Grid dimension for the simulation / 模拟网格尺寸
 let n = 300;
 const universe = isBench ? window.u : Universe.new(n, n);
 
@@ -80,9 +86,11 @@ let height = n;
 const canvas = document.getElementById("sand-canvas");
 const canvas2 = document.getElementById("fluid-canvas");
 
+// Scale canvas to match device pixel ratio for crisp rendering / 缩放画布以匹配设备像素比，实现清晰渲染
 canvas.height = n * Math.ceil(window.devicePixelRatio);
 canvas.width = n * Math.ceil(window.devicePixelRatio);
 
+// Prevent page scrolling while painting on touch devices / 在触控设备上绘制时防止页面滚动
 document.getElementById("background").addEventListener("touchmove", (e) => {
   if (!window.paused) {
     if (e.cancelable) {
@@ -100,6 +108,7 @@ if (!isBench) {
   fluid = window.f;
   drawSand = window.r;
 }
+// Main render loop: tick universe, update fluid, check goals, draw sand / 主渲染循环：推进宇宙、更新流体、检查目标、绘制沙子
 const renderLoop = () => {
   if (!window.paused) {
     fps.render();
@@ -123,8 +132,8 @@ window.setLevelGoal = (goal) => {
   resetGoalState();
 };
 
+// Skip boot animation when a level is loaded / 加载关卡时跳过启动动画
 if (!isBench) {
-  // Check if a level was specified - skip boot in that case
   const levelParam = new URLSearchParams(window.location.search).get("level");
   if (levelParam === null || levelParam === "0") {
     boot(width, height);
@@ -133,7 +142,9 @@ if (!isBench) {
   }
 }
 
+// Reset fluid and universe state / 重置流体和宇宙状态
 function reset() {
+  // Double reset to fully clear fluid state / 双重重置以完全清除流体状态
   fluid.reset();
   fluid.update();
   fluid.reset();
@@ -142,6 +153,7 @@ function reset() {
   universe.reset();
 }
 
+// Ctrl+Z / Cmd+Z: reset and pop undo stack / 重置并弹出撤销栈
 document.addEventListener("keydown", function (event) {
   if ((event.ctrlKey || event.metaKey) && event.key === "z") {
     reset();
@@ -149,6 +161,7 @@ document.addEventListener("keydown", function (event) {
   }
 });
 
+// Paste SVG data to load as pixel art into the universe / 粘贴SVG数据以像素画方式加载到宇宙中
 document.addEventListener("paste", function (event) {
   const text = event.clipboardData.getData("text/plain");
   if (text.includes("<svg")) {
