@@ -13,6 +13,7 @@ import SignInButton from "./signinButton.js";
 import Promotab from "./promotab";
 import { svgToImageData, rgbaToSpecies } from "../convertSVG";
 import levels from "../game/levels";
+import { resetGoalState } from "../game/goalChecker";
 
 import Menu from "./menu";
 
@@ -128,6 +129,7 @@ class Index extends React.Component {
       currentSubmission: null,
       selectedElement: Species.Water,
       currentLevel: null,
+      showVictory: false,
     };
     window.UI = this;
     //if we start in the background, pause;
@@ -152,6 +154,10 @@ class Index extends React.Component {
   }
 
   componentDidMount() {
+    window.onGoalAchieved = () => {
+      this.pause();
+      this.setState({ showVictory: true });
+    };
     if (this.state.currentLevel && this.state.currentLevel.id !== 0) {
       window.stopboot = true;
       reset();
@@ -159,6 +165,9 @@ class Index extends React.Component {
       universe.flush_undos();
       universe.push_undo();
       this.pause();
+      if (this.state.currentLevel.goal) {
+        window.setLevelGoal(this.state.currentLevel.goal);
+      }
     } else {
       this.play();
     }
@@ -224,6 +233,11 @@ class Index extends React.Component {
     }
     universe.flush_undos();
     universe.push_undo();
+    this.setState({ showVictory: false });
+    resetGoalState();
+    if (level.goal) {
+      window.setLevelGoal(level.goal);
+    }
     this.pause();
   }
 
@@ -588,6 +602,22 @@ class Index extends React.Component {
             <Link to="/levels" className="x">
               <button title="返回关卡选择">✕</button>
             </Link>
+          </div>
+        )}
+
+        {this.state.showVictory && (
+          <div className="victory-overlay">
+            <div className="victory-card">
+              <h2>目标达成!</h2>
+              <p>{this.state.currentLevel?.goal?.label} - 完成!</p>
+              <button onClick={() => this.setState({ showVictory: false })}>
+                继续游玩
+              </button>
+              <button onClick={() => this.restartLevel()}>重新开始</button>
+              <Link to="/levels">
+                <button>选择关卡</button>
+              </Link>
+            </div>
           </div>
         )}
 

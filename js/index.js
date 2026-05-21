@@ -26,6 +26,7 @@ import {} from "./paint";
 import {} from "./app";
 import { startFluid } from "./fluid";
 import {} from "./layout";
+import { checkGoal, resetGoalState, isGoalAchieved } from "./game/goalChecker";
 
 const isBench = window.location.pathname === "/bench";
 if (window.safari) {
@@ -101,9 +102,13 @@ if (!isBench) {
 }
 const renderLoop = () => {
   if (!window.paused) {
-    fps.render(); // new
+    fps.render();
     universe.tick();
     fluid.update();
+    if (levelGoal && checkGoal(levelGoal, universe, width, height)) {
+      window.paused = true;
+      if (window.onGoalAchieved) window.onGoalAchieved();
+    }
   }
   drawSand();
 
@@ -111,6 +116,12 @@ const renderLoop = () => {
 };
 renderLoop();
 window.u = universe;
+
+let levelGoal = null;
+window.setLevelGoal = (goal) => {
+  levelGoal = goal;
+  resetGoalState();
+};
 
 if (!isBench) {
   // Check if a level was specified - skip boot in that case

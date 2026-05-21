@@ -911,8 +911,9 @@ function startFluid({ universe }) {
   let boundingRect;
   let scaleX;
   let scaleY;
+  let fluidResizeTimer = null;
 
-  let resize = () => {
+  let doResize = () => {
     boundingRect = sandCanvas.getBoundingClientRect();
     scaleX =
       sandCanvas.width /
@@ -923,7 +924,12 @@ function startFluid({ universe }) {
       Math.ceil(window.devicePixelRatio) /
       boundingRect.height;
   };
-  resize();
+
+  let resize = () => {
+    clearTimeout(fluidResizeTimer);
+    fluidResizeTimer = setTimeout(doResize, 120);
+  };
+  doResize();
   window.addEventListener("resize", resize);
   window.addEventListener("deviceorientation", resize, true);
 

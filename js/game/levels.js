@@ -1,5 +1,10 @@
 import { Species } from "../../crate/pkg/sandtable";
 
+const GoalType = {
+  CLEAR_ALL: "CLEAR_ALL", // Eliminate all cells of target species
+  CREATE: "CREATE",       // Reach at least N cells of target species
+};
+
 /**
  * Level definition format:
  * {
@@ -7,7 +12,8 @@ import { Species } from "../../crate/pkg/sandtable";
  *   name: string,
  *   description: string,
  *   difficulty: 1-5,
- *   setup: (universe, width, height) => void  // paint initial state
+ *   setup: (universe, width, height) => void,  // paint initial state
+ *   goal?: { type, species, target?, label }    // win condition
  * }
  */
 
@@ -37,6 +43,7 @@ const levels = [
     name: "灭火行动",
     description: "森林着火了！用水扑灭火焰",
     difficulty: 2,
+    goal: { type: GoalType.CLEAR_ALL, species: Species.Fire, label: "扑灭所有火焰" },
     setup: (u, w, h) => {
       // Create a fire in the middle
       for (let x = Math.floor(w * 0.3); x <= Math.floor(w * 0.7); x++) {
@@ -62,6 +69,7 @@ const levels = [
     name: "沙漠绿洲",
     description: "在沙漠中播撒种子，浇灌出一片绿洲",
     difficulty: 2,
+    goal: { type: GoalType.CREATE, species: Species.Plant, target: 30, label: "种出30株植物" },
     setup: (u, w, h) => {
       // Sand ground
       for (let x = 0; x < w; x++) {
@@ -82,6 +90,7 @@ const levels = [
     name: "冰与火之歌",
     description: "用岩浆攻破冰封堡垒",
     difficulty: 3,
+    goal: { type: GoalType.CREATE, species: Species.Water, target: 200, label: "生成200格水" },
     setup: (u, w, h) => {
       // Ice fortress on the right
       for (let x = Math.floor(w * 0.55); x <= Math.floor(w * 0.8); x++) {
@@ -103,6 +112,7 @@ const levels = [
     name: "石油泄漏",
     description: "控制石油泄漏，防止污染扩散",
     difficulty: 3,
+    goal: { type: GoalType.CLEAR_ALL, species: Species.Oil, label: "清除所有石油" },
     setup: (u, w, h) => {
       // Water base
       for (let y = Math.floor(h * 0.5); y <= Math.floor(h * 0.8); y++) {
@@ -123,6 +133,7 @@ const levels = [
     name: "真菌危机",
     description: "真菌正在吞噬一切！",
     difficulty: 3,
+    goal: { type: GoalType.CLEAR_ALL, species: Species.Fungus, label: "清除所有真菌" },
     setup: (u, w, h) => {
       // Wood structure
       for (let x = Math.floor(w * 0.2); x <= Math.floor(w * 0.8); x++) {
@@ -148,6 +159,7 @@ const levels = [
     name: "火箭试射",
     description: "点燃引信，发射火箭！",
     difficulty: 4,
+    goal: { type: GoalType.CREATE, species: Species.Fire, target: 5, label: "点燃5个火焰点" },
     setup: (u, w, h) => {
       // Launch pad
       for (let x = Math.floor(w * 0.4); x <= Math.floor(w * 0.6); x++) {
@@ -166,6 +178,7 @@ const levels = [
     name: "酸蚀试验",
     description: "酸能腐蚀大部分物质，但墙是坚不可摧的",
     difficulty: 4,
+    goal: { type: GoalType.CLEAR_ALL, species: Species.Ice, label: "用酸融化所有冰" },
     setup: (u, w, h) => {
       // Walls forming chambers
       for (let y = Math.floor(h * 0.2); y <= Math.floor(h * 0.6); y++) {
@@ -189,6 +202,7 @@ const levels = [
     name: "冰雪世界",
     description: "大雪纷飞，用水和火创造奇妙的景观",
     difficulty: 2,
+    goal: { type: GoalType.CREATE, species: Species.Plant, target: 10, label: "种出10株植物" },
     setup: (u, w, h) => {
       // Snow-covered ground
       fillRect(u, 0, Math.floor(h * 0.65), w, Math.floor(h * 0.7), Species.Snow, 5);
@@ -212,6 +226,7 @@ const levels = [
     name: "元素大乱斗",
     description: "所有元素混在一起，会怎样？",
     difficulty: 5,
+    goal: { type: GoalType.CREATE, species: Species.Fire, target: 100, label: "引发100格火焰" },
     setup: (u, w, h) => {
       const species_list = [
         Species.Sand, Species.Water, Species.Fire, Species.Lava,
@@ -229,4 +244,5 @@ const levels = [
   }
 ];
 
+export { GoalType };
 export default levels;
